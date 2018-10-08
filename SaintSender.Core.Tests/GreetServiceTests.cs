@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using SaintSender.Services;
+using SaintSender.Core.Services;
 
 namespace SaintSender.Core.Tests
 {

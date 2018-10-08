@@ -1,4 +1,4 @@
-﻿namespace SaintSender.Interfaces
+﻿namespace SaintSender.Core.Interfaces
 {
     public interface IGreetService
     {

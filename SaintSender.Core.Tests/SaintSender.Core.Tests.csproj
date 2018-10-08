@@ -55,7 +55,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SaintSender\SaintSender.Core.csproj">
+    <ProjectReference Include="..\SaintSender.Core\SaintSender.Core.csproj">
       <Project>{bb60aa70-e219-40fd-a048-061a618f809d}</Project>
       <Name>SaintSender.Core</Name>
     </ProjectReference>

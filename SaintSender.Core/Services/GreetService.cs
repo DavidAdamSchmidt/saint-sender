@@ -1,7 +1,7 @@
 ﻿using System;
-using SaintSender.Interfaces;
+using SaintSender.Core.Interfaces;
 
-namespace SaintSender.Services
+namespace SaintSender.Core.Services
 {
     public class GreetService : IGreetService
     {

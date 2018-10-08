@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2019
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaintSender.Core", "SaintSender\SaintSender.Core.csproj", "{BB60AA70-E219-40FD-A048-061A618F809D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaintSender.Core", "SaintSender.Core\SaintSender.Core.csproj", "{BB60AA70-E219-40FD-A048-061A618F809D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaintSender.Core.Tests", "SaintSender.Core.Tests\SaintSender.Core.Tests.csproj", "{33072715-C72F-49CC-A1BE-8E21CEE9B739}"
 EndProject

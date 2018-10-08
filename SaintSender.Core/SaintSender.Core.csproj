@@ -7,8 +7,8 @@
     <ProjectGuid>{BB60AA70-E219-40FD-A048-061A618F809D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SaintSender</RootNamespace>
-    <AssemblyName>SaintSender</AssemblyName>
+    <RootNamespace>SaintSender.Core</RootNamespace>
+    <AssemblyName>SaintSender.Core</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
