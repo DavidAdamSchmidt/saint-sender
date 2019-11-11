@@ -7,26 +7,41 @@
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="SaintSender" Height="250" Width="250">
+        Title="SaintSender"
+        Height="320" Width="320" MinHeight="280" MinWidth="200" MaxHeight="400" MaxWidth="600"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <vm:LoginWindowModel x:Key="Model" />
+        <Style TargetType="{x:Type WrapPanel}">
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="{x:Type Label}">
+            <Setter Property="Width" Value="70" />
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Width" Value="140" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Width" Value="75" />
+            <Setter Property="Margin" Value="12,10" />
+        </Style>
     </Window.Resources>
-    <StackPanel DataContext="{StaticResource Model}">
+    <StackPanel DataContext="{StaticResource Model}" HorizontalAlignment="Center" VerticalAlignment="Center">
         <WrapPanel>
-            <Label>Email:</Label>
-            <TextBox Width="100" Text="{Binding Email}" />
+            <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
+            <TextBox x:Name="TxtBxEmail" Text="{Binding Email}" />
         </WrapPanel>
         <WrapPanel>
-            <Label>Password:</Label>
-            <TextBox Width="100" Text="{Binding Password}" />
+            <Label Target="{Binding ElementName=TxtBxPassword}">_Password:</Label>
+            <TextBox x:Name="TxtBxPassword" Text="{Binding Password}" />
         </WrapPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+        <WrapPanel>
             <Button>Sign in</Button>
-            <Button Grid.Column="1" Command="{Binding CancelButtonClickCommand}">Cancel</Button>
-        </Grid>
+            <Button Command="{Binding CancelButtonClickCommand}">Cancel</Button>
+        </WrapPanel>
     </StackPanel>
 </Window>
