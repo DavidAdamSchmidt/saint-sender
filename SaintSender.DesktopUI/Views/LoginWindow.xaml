@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
         Title="SaintSender" Height="250" Width="250">
     <Window.Resources>
@@ -13,11 +14,11 @@
     <StackPanel DataContext="{StaticResource Model}">
         <WrapPanel>
             <Label>Email:</Label>
-            <TextBox Width="100" />
+            <TextBox Width="100" Text="{Binding Email}" />
         </WrapPanel>
         <WrapPanel>
             <Label>Password:</Label>
-            <PasswordBox Width="100" />
+            <TextBox Width="100" Text="{Binding Password}" />
         </WrapPanel>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -25,7 +26,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <Button>Sign in</Button>
-            <Button Grid.Column="1">Cancel</Button>
+            <Button Grid.Column="1" Command="{Binding CancelButtonClickCommand}">Cancel</Button>
         </Grid>
     </StackPanel>
 </Window>
