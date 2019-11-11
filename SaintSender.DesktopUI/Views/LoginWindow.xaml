@@ -33,11 +33,11 @@
     <StackPanel DataContext="{StaticResource Model}" HorizontalAlignment="Center" VerticalAlignment="Center">
         <WrapPanel>
             <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
-            <TextBox x:Name="TxtBxEmail" Text="{Binding Email}" />
+            <TextBox x:Name="TxtBxEmail" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
         </WrapPanel>
         <WrapPanel>
             <Label Target="{Binding ElementName=TxtBxPassword}">_Password:</Label>
-            <TextBox x:Name="TxtBxPassword" Text="{Binding Password}" />
+            <TextBox x:Name="TxtBxPassword" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" />
         </WrapPanel>
         <WrapPanel>
             <Button>Sign in</Button>
