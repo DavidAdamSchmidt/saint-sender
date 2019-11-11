@@ -1,0 +1,31 @@
+﻿<Window x:Class="SaintSender.DesktopUI.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SaintSender.DesktopUI"
+        xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        mc:Ignorable="d"
+        Title="SaintSender" Height="250" Width="250">
+    <Window.Resources>
+        <vm:LoginWindowModel x:Key="Model" />
+    </Window.Resources>
+    <StackPanel DataContext="{StaticResource Model}">
+        <WrapPanel>
+            <Label>Email:</Label>
+            <TextBox Width="100" />
+        </WrapPanel>
+        <WrapPanel>
+            <Label>Password:</Label>
+            <PasswordBox Width="100" />
+        </WrapPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button>Sign in</Button>
+            <Button Grid.Column="1">Cancel</Button>
+        </Grid>
+    </StackPanel>
+</Window>
