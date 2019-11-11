@@ -29,7 +29,7 @@ namespace SaintSender.DesktopUI.ViewModels
         private void SetCommands()
         {
             CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
-            PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLogin_CanExecute);
+            PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
         }
 
         private void CancelLogin_Execute(PasswordBox passwordBox)
@@ -43,7 +43,7 @@ namespace SaintSender.DesktopUI.ViewModels
             return !string.IsNullOrWhiteSpace(Email) || !string.IsNullOrWhiteSpace(passwordBox?.Password);
         }
 
-        private void UpdateCancelLogin_CanExecute(string s)
+        private void UpdateCancelLoginAvailability_Execute(string s)
         {
             CancelButtonClickCommand.RaiseCanExecuteChanged();
         }
