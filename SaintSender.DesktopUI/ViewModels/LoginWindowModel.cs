@@ -1,11 +1,11 @@
-﻿using SaintSender.Core.Entities;
+﻿using System.Windows.Controls;
+using SaintSender.Core.Entities;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
     public class LoginWindowModel : ViewModelBase
     {
         private string _email;
-        private string _password;
 
         public LoginWindowModel()
         {
@@ -22,37 +22,30 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
-        public string Password
-        {
-            get => _password;
-            set
-            {
-                SetProperty(ref _password, value);
-                CancelButtonClickCommand.RaiseCanExecuteChanged();
-            }
-        }
+        public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
 
-        public DelegateCommand<string> CancelButtonClickCommand { get; private set; }
+        public DelegateCommand<string> PasswordChangedCommand { get; private set; }
 
         private void SetCommands()
         {
-            SetCancelButtonCommand();
+            CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
+            PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLogin_CanExecute);
         }
 
-        private void SetCancelButtonCommand()
-        {
-            CancelButtonClickCommand = new DelegateCommand<string>(CancelLogin_Execute, CancelLogin_CanExecute);
-        }
-
-        private void CancelLogin_Execute(string s)
+        private void CancelLogin_Execute(PasswordBox passwordBox)
         {
             Email = string.Empty;
-            Password = string.Empty;
+            passwordBox.Password = string.Empty;
         }
 
-        private bool CancelLogin_CanExecute(string s)
+        private bool CancelLogin_CanExecute(PasswordBox passwordBox)
         {
-            return !string.IsNullOrWhiteSpace(Email) || !string.IsNullOrWhiteSpace(Password);
+            return !string.IsNullOrWhiteSpace(Email) || !string.IsNullOrWhiteSpace(passwordBox?.Password);
+        }
+
+        private void UpdateCancelLogin_CanExecute(string s)
+        {
+            CancelButtonClickCommand.RaiseCanExecuteChanged();
         }
     }
 }
