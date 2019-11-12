@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace SaintSender.DesktopUI
+namespace SaintSender.DesktopUI.Views
 {
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
