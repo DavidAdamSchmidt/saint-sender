@@ -4,9 +4,29 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
+        xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="MainWindow" Height="565.445" Width="781.152">
+    <Window.Resources>
+        <vm:MainWindowModel x:Key="Model" />
+    </Window.Resources>
+    <Grid DataContext="{StaticResource Model}">
+        <Label Content="{Binding userMail}" HorizontalAlignment="Left" Margin="559,37,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="664,40,35,474" Width="74">
+            Log Out
+        </Button>
+        <Button Command="{Binding SendNewButtonClickCommand}" Margin="39,37,660,477"  Width="74">
+            Send New
+        </Button>
+        <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Height="362" Margin="39,120,35,52" Width="699">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>            
+        </ListBox>
+        <Button x:Name="Previous" Content="&lt;" VerticalAlignment="Center" Margin="239,482,460,32" Width="74"/>
+        <Button x:Name="Next" Content="&gt;" VerticalAlignment="Center" Margin="457,482,242,32" Width="74"/>
     </Grid>
 </Window>

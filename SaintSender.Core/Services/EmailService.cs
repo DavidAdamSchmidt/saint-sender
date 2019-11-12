@@ -8,6 +8,7 @@ namespace SaintSender.Core.Services
     {
         private const string ImapHost = "imap.gmail.com";
         private static readonly ImapClient ImapClient;
+        public static string Email { get; set; } = string.Empty;
 
         static EmailService()
         {
@@ -21,6 +22,8 @@ namespace SaintSender.Core.Services
             {
                 return false;
             }
+
+            Email = email;
 
             using (ImapClient)
             {
