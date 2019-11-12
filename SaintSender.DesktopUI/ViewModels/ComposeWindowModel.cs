@@ -1,4 +1,6 @@
 ﻿using SaintSender.Core.Entities;
+using SaintSender.Core.Services;
+using System.Windows;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -46,7 +48,10 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void SendEmail_Execute(string s)
         {
-            // TODO
+            //EmailService.SendMail("", _subject, _message);
+
+            //MessageBox.Show("Your e-mail has bent sent!", "Success",
+            //    MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private bool SendEmail_CanExecute(string s)
