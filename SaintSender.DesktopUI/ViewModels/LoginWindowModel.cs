@@ -1,5 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using SaintSender.Core.Entities;
+using SaintSender.Core.Services;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -24,11 +26,14 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
 
+        public DelegateCommand<PasswordBox> SignInButtonClickCommand { get; private set; }
+
         public DelegateCommand<string> PasswordChangedCommand { get; private set; }
 
         private void SetCommands()
         {
             CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
+            SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute);
             PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
         }
 
@@ -41,6 +46,13 @@ namespace SaintSender.DesktopUI.ViewModels
         private bool CancelLogin_CanExecute(PasswordBox passwordBox)
         {
             return !string.IsNullOrWhiteSpace(Email) || !string.IsNullOrWhiteSpace(passwordBox?.Password);
+        }
+
+        private void AuthenticateLogin_Execute(PasswordBox passwordBox)
+        {
+            var result = EmailService.Authenticate(_email, passwordBox.Password);
+
+            MessageBox.Show(result.ToString());
         }
 
         private void UpdateCancelLoginAvailability_Execute(string s)

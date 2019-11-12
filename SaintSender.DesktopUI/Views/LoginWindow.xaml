@@ -47,7 +47,9 @@
             </PasswordBox>
         </WrapPanel>
         <WrapPanel>
-            <Button>Sign in</Button>
+            <Button Command="{Binding SignInButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
+                Sign in
+            </Button>
             <Button Command="{Binding CancelButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
                 Cancel
             </Button>
