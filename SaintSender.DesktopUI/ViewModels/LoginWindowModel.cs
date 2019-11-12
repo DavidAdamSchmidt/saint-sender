@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
+using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -52,7 +53,19 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             var result = EmailService.Authenticate(_email, passwordBox.Password);
 
-            MessageBox.Show(result.ToString());
+            if (result)
+            {
+                var mainWindow = new MainWindow();
+                mainWindow.Show();
+
+                var parentWindow = Window.GetWindow(passwordBox);
+                parentWindow?.Close();
+            }
+            else
+            {
+                MessageBox.Show("Wrong email or password provided.", "Credentials Alert", MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation);
+            }
         }
 
         private void UpdateCancelLoginAvailability_Execute(string s)
