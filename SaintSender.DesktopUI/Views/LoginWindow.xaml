@@ -37,8 +37,8 @@
                      Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
         </WrapPanel>
         <WrapPanel>
-            <Label Target="{Binding ElementName=TxtBxPassword}">_Password:</Label>
-            <PasswordBox x:Name="TxtBxPassword" Style="{StaticResource Input}">
+            <Label Target="{Binding ElementName=PwBxPassword}">_Password:</Label>
+            <PasswordBox x:Name="PwBxPassword" Style="{StaticResource Input}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="PasswordChanged">
                         <i:InvokeCommandAction Command="{Binding PasswordChangedCommand}" />
@@ -48,7 +48,7 @@
         </WrapPanel>
         <WrapPanel>
             <Button>Sign in</Button>
-            <Button Command="{Binding CancelButtonClickCommand}" CommandParameter="{Binding ElementName=TxtBxPassword}">
+            <Button Command="{Binding CancelButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
                 Cancel
             </Button>
         </WrapPanel>
