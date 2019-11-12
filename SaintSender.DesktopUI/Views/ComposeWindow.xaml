@@ -1,0 +1,52 @@
+﻿<Window x:Class="SaintSender.DesktopUI.Views.ComposeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
+        xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="New e-mail" Height="450" Width="800" MinHeight="320" MinWidth="320">
+    <Window.Resources>
+        <system:Double x:Key="ControlHeight">24</system:Double>
+        <GridLength x:Key="RowHeight">44</GridLength>
+        <vm:ComposeWindowModel x:Key="Model" />
+        <Style TargetType="Label">
+            <Setter Property="Height" Value="25" />
+        </Style>
+        <Style x:Key="Field" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="{StaticResource ControlHeight}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Height" Value="{StaticResource ControlHeight}" />
+            <Setter Property="Width" Value="70" />
+        </Style>
+    </Window.Resources>
+    <Grid DataContext="{StaticResource Model}" Margin="40">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{StaticResource RowHeight}" />
+            <RowDefinition Height="{StaticResource RowHeight}" />
+            <RowDefinition />
+            <RowDefinition Height="{StaticResource RowHeight}" />
+        </Grid.RowDefinitions>
+        <Label Target="{Binding ElementName=TxtBxRecipient}">_To:</Label>
+        <TextBox x:Name="TxtBxRecipient" Grid.Column="1" Grid.Row="0" Style="{StaticResource Field}"
+                 Text="{Binding Recipient, UpdateSourceTrigger=PropertyChanged}" />
+        <Label Grid.Column="0" Grid.Row="1" Target="{Binding ElementName=TxtBxSubject}">_Subject:</Label>
+        <TextBox x:Name="TxtBxSubject" Grid.Column="1" Grid.Row="1" Style="{StaticResource Field}"
+                 Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,0"
+                 AcceptsReturn="True" TextWrapping="Wrap"
+                 Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Command="{Binding SendButtonClickCommand}">
+            Send
+        </Button>
+    </Grid>
+</Window>
