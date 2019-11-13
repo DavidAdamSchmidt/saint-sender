@@ -8,7 +8,7 @@
         xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" ResizeMode="NoResize" >
+        Title="MainWindow" ResizeMode="NoResize" Height="743.5" Width="899.5" >
     <Window.DataContext>
         <vm:MainWindowModel />
     </Window.DataContext>
@@ -17,14 +17,12 @@
         <Style TargetType="local:MainWindow">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Height" Value="600"/>
-            <Setter Property="Width" Value="800" />
+            <Setter Property="Height" Value="700"/>
+            <Setter Property="Width" Value="850" />
         </Style>
         <Style TargetType="{x:Type Button}">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Height" Value="20"/>
-            <Setter Property="Width" Value="75" />
+            <Setter Property="Width" Value="70" />
         </Style>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -33,14 +31,14 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
-        <Label Content="{Binding UserEmail}" Margin="0,49,128,0" VerticalAlignment="Top" HorizontalAlignment="Right" Height="40" VerticalContentAlignment="Stretch" Width="Auto" FontWeight="Bold"/>
-        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
+        <Label Content="{Binding UserEmail}" Margin="0,74,189,0" VerticalAlignment="Top" HorizontalAlignment="Right" Height="40" VerticalContentAlignment="Stretch" Width="Auto" FontWeight="Bold"/>
+        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="700,70,74,602">
             _Log Out
         </Button>
-        <Button Command="{Binding SendNewButtonClickCommand}" Margin="36,37,651,477">
+        <Button Command="{Binding SendNewButtonClickCommand}" Margin="74,69,700,603">
             _Send New
         </Button>
-        <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Height="362" Margin="39,120,35,52" Width="699">
+        <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Margin="74,154,74,107">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}" CommandParameter="{Binding ElementName=Mails, Path=SelectedItem}"/>
@@ -56,11 +54,14 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button x:Name="Previous" Margin="256,519,464,32" Width="74">
+        <Button x:Name="Previous" Margin="210,606,560,66" Width="74">
             _Previous
         </Button>
-        <Button x:Name="Next" Margin="474,519,246,32" Width="74">
+        <Button x:Name="Next" Margin="580,611,190,61" Width="74">
             _Next
+        </Button>
+        <Button Command="{Binding RefreshButtonClickCommand}" Margin="168,70,606,602">
+            _Refresh
         </Button>
     </Grid>
 </Window>
