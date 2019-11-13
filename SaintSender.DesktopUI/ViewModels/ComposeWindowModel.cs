@@ -9,6 +9,7 @@ namespace SaintSender.DesktopUI.ViewModels
         private string _recipient;
         private string _subject;
         private string _message;
+        private bool _sending;
 
         public ComposeWindowModel()
         {
@@ -33,6 +34,12 @@ namespace SaintSender.DesktopUI.ViewModels
             set => SetEmailProperty(ref _message, value);
         }
 
+        public bool IsSending
+        {
+            get => _sending;
+            set => SetProperty(ref _sending, value);
+        }
+
         public DelegateCommand<string> SendButtonClickCommand { get; private set; }
 
         private void SetCommands()
@@ -48,7 +55,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private async void SendEmail_Execute(string s)
         {
+            IsSending = true;
+
             var sent = await EmailService.SendMail("", _subject, _message);
+
+            IsSending = false;
 
             if (sent)
             {

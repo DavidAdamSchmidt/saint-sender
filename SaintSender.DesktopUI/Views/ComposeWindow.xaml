@@ -10,8 +10,9 @@
         mc:Ignorable="d"
         Title="New e-mail" Height="450" Width="800" MinHeight="320" MinWidth="320">
     <Window.Resources>
-        <system:Double x:Key="ControlHeight">24</system:Double>
         <vm:ComposeWindowModel x:Key="Model" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <system:Double x:Key="ControlHeight">24</system:Double>
         <Style TargetType="Label">
             <Setter Property="Height" Value="25" />
         </Style>
@@ -47,11 +48,12 @@
         <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,0"
                  AcceptsReturn="True" TextWrapping="Wrap"
                  Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
-        <WrapPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10">
+        <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10" Orientation="Horizontal">
             <Button Command="{Binding SendButtonClickCommand}">
                 Send
             </Button>
-            <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48" Visibility="Hidden" />
-        </WrapPanel>
+            <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48"
+                             Visibility="{Binding IsSending, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </StackPanel>
     </Grid>
 </Window>
