@@ -7,6 +7,7 @@ namespace SaintSender.Core.Entities
     {
         private readonly Predicate<T> _canExecute;
         private readonly Action<T> _execute;
+        private DelegateCommand<string> isEmailRead;
 
         public DelegateCommand(Action<T> execute)
             : this(execute, null)
@@ -17,6 +18,11 @@ namespace SaintSender.Core.Entities
         {
             _execute = execute;
             _canExecute = canExecute;
+        }
+
+        public DelegateCommand(DelegateCommand<string> isEmailRead)
+        {
+            this.isEmailRead = isEmailRead;
         }
 
         public bool CanExecute(object parameter)

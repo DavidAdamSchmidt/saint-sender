@@ -5,28 +5,67 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" Height="565.445" Width="781.152">
+        Title="MainWindow" ResizeMode="NoResize">
     <Window.Resources>
+        <conv:BooleanToFontWeightConverter x:Key="BoolToFont"/>
         <vm:MainWindowModel x:Key="Model" />
+        <Style TargetType="local:MainWindow">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="600"/>
+            <Setter Property="Width" Value="800" />
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="75" />
+        </Style>
+        <Style TargetType="{x:Type Label}">
+            <Setter Property="Width" Value="70"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="0,40,135,0"/>
+        </Style>
     </Window.Resources>
     <Grid DataContext="{StaticResource Model}">
-        <Label Content="{Binding userMail}" HorizontalAlignment="Left" Margin="559,37,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="664,40,35,474" Width="74">
-            Log Out
+        <Label Content="{Binding userMail}"/>
+        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
+            _Log Out
         </Button>
-        <Button Command="{Binding SendNewButtonClickCommand}" Margin="39,37,660,477"  Width="74">
-            Send New
+        <Button Command="{Binding SendNewButtonClickCommand}" Margin="36,37,651,477">
+            _Send New
         </Button>
         <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Height="362" Margin="39,120,35,52" Width="699">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
-                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}"/>
+                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}" CommandParameter="{Binding ElementName=Mails, Path=SelectedItem}"/>
                 </i:EventTrigger>
-            </i:Interaction.Triggers>            
+            </i:Interaction.Triggers>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel x:Name="Item">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Loaded">
+                                <i:InvokeCommandAction Command="{Binding CheckIfEmailWasRead}" CommandParameter="{Binding Path=BodyHtml}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <TextBlock Text="{Binding Path=Subject}" FontWeight="{Binding , Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=Sender}" />
+                        <TextBlock Text="{Binding Path=Date}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
         </ListBox>
-        <Button x:Name="Previous" Content="&lt;" VerticalAlignment="Center" Margin="239,482,460,32" Width="74"/>
-        <Button x:Name="Next" Content="&gt;" VerticalAlignment="Center" Margin="457,482,242,32" Width="74"/>
+        <Button x:Name="Previous" Margin="239,482,460,32">
+            _Previous
+        </Button>
+        <Button x:Name="Next" Margin="457,482,242,32">
+            _Next
+        </Button>
     </Grid>
 </Window>
