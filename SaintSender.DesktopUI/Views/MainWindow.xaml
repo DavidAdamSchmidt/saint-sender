@@ -4,9 +4,63 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
+        xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
+        xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" ResizeMode="NoResize" >
+    <Window.DataContext>
+        <vm:MainWindowModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <conv:BooleanToFontWeightConverter x:Key="BoolToFont"/>
+        <Style TargetType="local:MainWindow">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="600"/>
+            <Setter Property="Width" Value="800" />
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="75" />
+        </Style>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ExitProgramCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
-        
+        <Label Content="{Binding UserEmail}" Margin="0,49,128,0" VerticalAlignment="Top" HorizontalAlignment="Right" Height="40" VerticalContentAlignment="Stretch" Width="Auto" FontWeight="Bold"/>
+        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
+            _Log Out
+        </Button>
+        <Button Command="{Binding SendNewButtonClickCommand}" Margin="36,37,651,477">
+            _Send New
+        </Button>
+        <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Height="362" Margin="39,120,35,52" Width="699">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}" CommandParameter="{Binding ElementName=Mails, Path=SelectedItem}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel x:Name="Item">
+                        <TextBlock Text="{Binding Path=Subject}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=From}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=Date}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="Previous" Margin="256,519,464,32" Width="74">
+            _Previous
+        </Button>
+        <Button x:Name="Next" Margin="474,519,246,32" Width="74">
+            _Next
+        </Button>
     </Grid>
 </Window>
