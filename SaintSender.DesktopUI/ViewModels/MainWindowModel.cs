@@ -16,7 +16,7 @@ namespace SaintSender.DesktopUI.ViewModels
             GetMails();
             SetCommands();
         }
-        private string _email = "valami";
+        private string _email;
         public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
         public ObservableCollection<CustoMail> Emails { get; private set; } = new ObservableCollection<CustoMail>();
 
@@ -84,7 +84,9 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void ReadEmail_Execute(CustoMail email)
         {
-            //new ReadEmailWindow();
+             var emailDetailsDialog = new EmailDetailsWindow();
+             emailDetailsDialog.DataContext = new EmailDetailsWindowModel(email);
+             emailDetailsDialog.ShowDialog();
         }
     }
 }
