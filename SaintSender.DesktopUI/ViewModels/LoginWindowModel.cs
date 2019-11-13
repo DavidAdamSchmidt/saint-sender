@@ -6,7 +6,7 @@ using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class LoginWindowModel : ViewModelBase
+    public class LoginWindowModel : Base
     {
         private string _email;
 

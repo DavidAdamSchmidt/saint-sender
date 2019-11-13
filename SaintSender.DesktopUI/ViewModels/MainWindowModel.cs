@@ -9,7 +9,7 @@ using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    class MainWindowModel : ViewModelBase
+    class MainWindowModel : Base
     {
         public MainWindowModel()
         {
@@ -17,8 +17,9 @@ namespace SaintSender.DesktopUI.ViewModels
             SetCommands();
         }
         private string _email;
+        private ObservableCollection<CustoMail> _emails;
         public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
-        public ObservableCollection<CustoMail> Emails { get; private set; } = new ObservableCollection<CustoMail>();
+        public ObservableCollection<CustoMail> Emails { get => _emails; set => SetProperty(ref _emails, value); }
 
         private void GetMails()
         {
@@ -38,7 +39,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
-
+        public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
 
         private void SetCommands()
         {
@@ -48,6 +49,13 @@ namespace SaintSender.DesktopUI.ViewModels
             NextPageButtonCommand = new DelegateCommand<string>(NextPageShow_Execute);
             PreviousPageButtonCommand = new DelegateCommand<string>(PreviousPageShow_Execute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
+            RefreshButtonClickCommand = new DelegateCommand<string>(RefreshCurrent_Execute);
+        }
+
+        private void RefreshCurrent_Execute(string obj)
+        {
+            EmailService.Flush(Emails);
+            Emails = EmailService.GetEmails();
         }
 
         private void Exit_Execute(string throwAway)
