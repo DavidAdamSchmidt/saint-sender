@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using GemBox.Email;
 using GemBox.Email.Imap;
 using MailAddress = System.Net.Mail.MailAddress;
@@ -44,31 +45,60 @@ namespace SaintSender.Core.Services
             }
         }
 
-        public static void SendMail(string recipient, string subject, string body)
+        public static async Task<bool> SendMail(string recipient, string subject, string body)
         {
-            // TODO: provide sender credential
+            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
+        }
 
-            var from = new MailAddress(string.Empty);
-            var to = new MailAddress(recipient);
+        private static bool TryToSendMail(string recipient, string subject, string body)
+        {
+            // TODO: provide sender credentials
 
-            var smtp = new SmtpClient
+            SmtpClient smtp = null;
+            MailMessage message = null;
+
+            try
             {
-                Host = SmtpHost,
-                Port = 587,
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(from.Address, string.Empty)
-            };
+                var from = new MailAddress(string.Empty);
+                var to = new MailAddress(recipient);
 
-            var message = new MailMessage(from, to)
+                smtp = new SmtpClient
+                {
+                    Host = SmtpHost,
+                    Port = 587,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(from.Address, string.Empty)
+                };
+
+                message = new MailMessage(from, to)
+                {
+                    Subject = subject,
+                    Body = body
+                };
+
+                smtp.Send(message);
+
+                return true;
+            }
+            catch (Exception ex) when(IsHandledForSendingFailure(ex))
             {
-                Subject = subject,
-                Body = body
-            };
+                return false;
+            }
+            finally
+            {
+                smtp?.Dispose();
+                message?.Dispose();
+            }
+        }
 
-            smtp.Send(message);
-            smtp.Dispose();
+        private static bool IsHandledForSendingFailure(Exception ex)
+        {
+            return ex is InvalidOperationException ||
+                   ex is SmtpException ||
+                   ex is ArgumentException ||
+                   ex is FormatException;
         }
     }
 }

@@ -46,12 +46,20 @@ namespace SaintSender.DesktopUI.ViewModels
             SendButtonClickCommand.RaiseCanExecuteChanged();
         }
 
-        private void SendEmail_Execute(string s)
+        private async void SendEmail_Execute(string s)
         {
-            //EmailService.SendMail("", _subject, _message);
+            var sent = await EmailService.SendMail("", _subject, _message);
 
-            //MessageBox.Show("Your e-mail has bent sent!", "Success",
-            //    MessageBoxButton.OK, MessageBoxImage.Information);
+            if (sent)
+            {
+                MessageBox.Show($"Your e-mail has bent sent to {_recipient}", "Success",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show($"Couldn't send your e-mail to {_recipient}", "Failed Operation",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool SendEmail_CanExecute(string s)
