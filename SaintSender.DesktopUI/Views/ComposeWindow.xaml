@@ -52,6 +52,9 @@
             <Button Command="{Binding SendButtonClickCommand}">
                 Send
             </Button>
+            <Button Command="{Binding CancelButtonClickCommand}">
+                Cancel
+            </Button>
             <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48"
                              Visibility="{Binding IsSending, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </StackPanel>

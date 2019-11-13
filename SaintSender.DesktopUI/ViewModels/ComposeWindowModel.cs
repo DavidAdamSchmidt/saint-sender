@@ -19,19 +19,19 @@ namespace SaintSender.DesktopUI.ViewModels
         public string Recipient
         {
             get => _recipient;
-            set => SetEmailProperty(ref _recipient, value);
+            set => SetProperty(ref _recipient, value);
         }
 
         public string Subject
         {
             get => _subject;
-            set => SetEmailProperty(ref _subject, value);
+            set => SetProperty(ref _subject, value);
         }
 
         public string Message
         {
             get => _message;
-            set => SetEmailProperty(ref _message, value);
+            set => SetProperty(ref _message, value);
         }
 
         public bool IsSending
@@ -42,15 +42,20 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> SendButtonClickCommand { get; private set; }
 
+        public DelegateCommand<string> CancelButtonClickCommand { get; private set; }
+
+        protected override void OnPropertyChanged(string propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+
+            SendButtonClickCommand.RaiseCanExecuteChanged();
+            CancelButtonClickCommand.RaiseCanExecuteChanged();
+        }
+
         private void SetCommands()
         {
             SendButtonClickCommand = new DelegateCommand<string>(SendEmail_Execute, SendEmail_CanExecute);
-        }
-
-        private void SetEmailProperty(ref string storage, string value)
-        {
-            storage = value;
-            SendButtonClickCommand.RaiseCanExecuteChanged();
+            CancelButtonClickCommand = new DelegateCommand<string>(CancelInput_Execute, CancelInput_CanExecute);
         }
 
         private async void SendEmail_Execute(string s)
@@ -77,7 +82,23 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             return !string.IsNullOrWhiteSpace(_recipient) &&
                    !string.IsNullOrWhiteSpace(_subject) &&
-                   !string.IsNullOrWhiteSpace(_message);
+                   !string.IsNullOrWhiteSpace(_message) &&
+                   !_sending;
+        }
+
+        private void CancelInput_Execute(string s)
+        {
+            Recipient = string.Empty;
+            Subject = string.Empty;
+            Message = string.Empty;
+        }
+
+        private bool CancelInput_CanExecute(string s)
+        {
+            return (!string.IsNullOrWhiteSpace(_recipient) ||
+                   !string.IsNullOrWhiteSpace(_subject) ||
+                   !string.IsNullOrWhiteSpace(_message)) &&
+                   !_sending;
         }
     }
 }
