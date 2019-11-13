@@ -13,7 +13,11 @@ namespace SaintSender.DesktopUI.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is bool b && b ? FontWeights.Bold : FontWeights.Normal;
+            if (!(bool)value)
+            {
+                return FontWeights.Bold;
+            }
+            return FontWeights.Normal;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

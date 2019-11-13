@@ -1,11 +1,9 @@
-﻿using GemBox.Email;
-using SaintSender.Core.Entities;
+﻿using SaintSender.Core.Entities;
+using SaintSender.Core.Interfaces;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,25 +11,19 @@ namespace SaintSender.DesktopUI.ViewModels
 {
     class MainWindowModel : ViewModelBase
     {
-        private bool _isRead;
-
         public MainWindowModel()
         {
             GetMails();
             SetCommands();
         }
-
-        public string userEmail { get; private set; } = EmailService.Email;
-        public ObservableCollection<MailMessage> Emails { get; private set; } = new ObservableCollection<MailMessage>();
-        public bool EmailIsRead { 
-            get => _isRead; 
-            set => SetProperty(ref _isRead, value); 
-        }
-
+        private string _email = "valami";
+        public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
+        public ObservableCollection<CustoMail> Emails { get; private set; } = new ObservableCollection<CustoMail>();
 
         private void GetMails()
         {
             Emails = EmailService.GetEmails(1, 20);
+            UserEmail = EmailService.Email;
         }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
@@ -42,27 +34,26 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> PreviousPageButtonCommand { get; private set; }
 
-        public DelegateCommand<MailMessage> ReadDoubleClickedEmail { get; private set; }
+        public DelegateCommand<CustoMail> ReadDoubleClickedEmail { get; private set; }
 
-        public DelegateCommand<string> CheckIfEmailWasRead { get; private set; }
+        public DelegateCommand<string> ExitProgramCommand { get; private set; }
+
+
 
         private void SetCommands()
         {
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute);
+            ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute);
             NextPageButtonCommand = new DelegateCommand<string>(NextPageShow_Execute);
             PreviousPageButtonCommand = new DelegateCommand<string>(PreviousPageShow_Execute);
-            ReadDoubleClickedEmail = new DelegateCommand<MailMessage>(ReadEmail_Execute);
-            CheckIfEmailWasRead = new DelegateCommand<string>(CheckMail);
+            ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
         }
 
-        private void CheckMail(string html)
+        private void Exit_Execute(string throwAway)
         {
-            if (html.Contains("<span hidden='hidden'>SEEN</span>"))
-            {
-               EmailIsRead = false;
-            }
-            EmailIsRead = true;
+            EmailService.Flush(Emails);
+            UserEmail = string.Empty;
         }
 
         private void PreviousPageShow_Execute(string throwAway)
@@ -80,15 +71,18 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void Logout_Execute(Button button)
         {
-            EmailService.Email = string.Empty;
+            EmailService.Flush(Emails);
+            UserEmail = string.Empty;
+
             var loginWindow = new LoginWindow();
             loginWindow.Show();
 
             var parentWindow = Window.GetWindow(button);
             parentWindow?.Close();
+
         }
 
-        private void ReadEmail_Execute(MailMessage email)
+        private void ReadEmail_Execute(CustoMail email)
         {
             //new ReadEmailWindow();
         }

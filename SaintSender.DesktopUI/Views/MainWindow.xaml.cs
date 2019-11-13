@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using SaintSender.Core.Interfaces;
+using System.Windows;
 
 namespace SaintSender.DesktopUI.Views
 {

@@ -8,10 +8,12 @@
         xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
-        Title="MainWindow" ResizeMode="NoResize">
+        Title="MainWindow" ResizeMode="NoResize" >
+    <Window.DataContext>
+        <vm:MainWindowModel />
+    </Window.DataContext>
     <Window.Resources>
         <conv:BooleanToFontWeightConverter x:Key="BoolToFont"/>
-        <vm:MainWindowModel x:Key="Model" />
         <Style TargetType="local:MainWindow">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -32,8 +34,13 @@
             <Setter Property="Margin" Value="0,40,135,0"/>
         </Style>
     </Window.Resources>
-    <Grid DataContext="{StaticResource Model}">
-        <Label Content="{Binding userMail}"/>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ExitProgramCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Label Content="{Binding UserEmail}" Margin="0,56,145,0"/>
         <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
             _Log Out
         </Button>
@@ -49,14 +56,9 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel x:Name="Item">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Loaded">
-                                <i:InvokeCommandAction Command="{Binding CheckIfEmailWasRead}" CommandParameter="{Binding Path=BodyHtml}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <TextBlock Text="{Binding Path=Subject}" FontWeight="{Binding , Converter={StaticResource BoolToFont}}"/>
-                        <TextBlock Text="{Binding Path=Sender}" />
-                        <TextBlock Text="{Binding Path=Date}" />
+                        <TextBlock Text="{Binding Path=Subject}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=Sender.DisplayName}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=Date}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

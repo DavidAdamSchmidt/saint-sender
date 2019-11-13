@@ -37,6 +37,7 @@
     <Reference Include="Mail, Version=3.0.19162.1801, Culture=neutral, PublicKeyToken=6dc438ab78a525b3, processorArchitecture=MSIL">
       <HintPath>..\packages\Mail.dll.3.0.19162.1801\lib\net45\Mail.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\CustoMail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
     <Compile Include="Services\Utils.cs" />
     <Compile Include="Services\EmailService.cs" />
