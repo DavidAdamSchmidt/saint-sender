@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 using GemBox.Email;
 using GemBox.Email.Imap;
 using MailAddress = System.Net.Mail.MailAddress;
@@ -27,7 +27,22 @@ namespace SaintSender.Core.Services
 
         public static string Email { get; set; }
 
-        public static bool Authenticate(string email, string password)
+        public static async Task<bool> Authenticate(string email, string password)
+        {
+            return await Task.Factory.StartNew(() => TryToAuthenticate(email, password));
+        }
+
+        public static async Task<bool> SendMail(string recipient, string subject, string body)
+        {
+            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
+        }
+
+        public static async Task FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToGetEmails(emails));
+        }
+
+        private static bool TryToAuthenticate(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -59,11 +74,6 @@ namespace SaintSender.Core.Services
 
                 return ImapClient.IsAuthenticated;
             }
-        }
-
-        public static async Task<bool> SendMail(string recipient, string subject, string body)
-        {
-            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
         }
 
         private static bool TryToSendMail(string recipient, string subject, string body)
@@ -117,9 +127,8 @@ namespace SaintSender.Core.Services
                    ex is FormatException;
         }
 
-        public static ObservableCollection<CustoMail> GetEmails()
+        private static void TryToGetEmails(ICollection<CustoMail> emails)
         {
-            var emails = new ObservableCollection<CustoMail>();
             using (ImapClient)
             {
                 ImapClient.Connect();
@@ -146,7 +155,6 @@ namespace SaintSender.Core.Services
                 }
 
             }
-            return emails;
         }
 
         private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)
@@ -165,11 +173,10 @@ namespace SaintSender.Core.Services
                 IsRead = readOrNot
             };
 
-
             return mail;
         }
 
-        public static void Flush(ObservableCollection<CustoMail> Emails)
+        public static void Flush(AsyncObservableCollection<CustoMail> Emails)
         {
             using (ImapClient)
             {

@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
@@ -9,6 +11,7 @@ namespace SaintSender.DesktopUI.ViewModels
     public class LoginWindowModel : ViewModelBase
     {
         private string _email;
+        private bool _sending;
 
         public LoginWindowModel()
         {
@@ -23,6 +26,12 @@ namespace SaintSender.DesktopUI.ViewModels
                 SetProperty(ref _email, value);
                 CancelButtonClickCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        public bool IsSending
+        {
+            get => _sending;
+            set => SetProperty(ref _sending, value);
         }
 
         public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
@@ -49,12 +58,15 @@ namespace SaintSender.DesktopUI.ViewModels
             return !string.IsNullOrWhiteSpace(Email) || !string.IsNullOrWhiteSpace(passwordBox?.Password);
         }
 
-        private void AuthenticateLogin_Execute(PasswordBox passwordBox)
+        private async void AuthenticateLogin_Execute(PasswordBox passwordBox)
         {
-            var result = EmailService.Authenticate(_email, passwordBox.Password);
+            IsSending = true;
+
+            var result = await EmailService.Authenticate(_email, passwordBox.Password);
 
             if (result)
             {
+
                 var mainWindow = new MainWindow();
                 mainWindow.Show();
 
@@ -63,6 +75,8 @@ namespace SaintSender.DesktopUI.ViewModels
             }
             else
             {
+                IsSending = false;
+
                 MessageBox.Show("Wrong email or password provided.", "Credentials Alert", MessageBoxButton.OK,
                     MessageBoxImage.Exclamation);
             }

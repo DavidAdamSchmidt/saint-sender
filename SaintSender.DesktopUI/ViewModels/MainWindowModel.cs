@@ -1,7 +1,6 @@
 ﻿using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,7 +16,7 @@ namespace SaintSender.DesktopUI.ViewModels
             SetCommands();
         }
 
-        public ObservableCollection<CustoMail> Emails { get; private set; } = new ObservableCollection<CustoMail>();
+        public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
 
         public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
 
@@ -33,9 +32,9 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
-        private void GetMails()
+        private async void GetMails()
         {
-            Emails = EmailService.GetEmails();
+            await EmailService.FillEmailCollection(Emails);
             UserEmail = EmailService.Email;
         }
 
