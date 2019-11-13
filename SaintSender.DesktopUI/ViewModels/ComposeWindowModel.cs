@@ -62,7 +62,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsSending = true;
 
-            var sent = await EmailService.SendMail("", _subject, _message);
+            var sent = await EmailService.SendMail(_recipient, _subject, _message);
 
             IsSending = false;
 

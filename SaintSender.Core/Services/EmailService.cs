@@ -72,7 +72,7 @@ namespace SaintSender.Core.Services
 
             try
             {
-                var from = new MailAddress(string.Empty);
+                var from = new MailAddress(Email);
                 var to = new MailAddress(recipient);
 
                 smtp = new SmtpClient
@@ -82,7 +82,7 @@ namespace SaintSender.Core.Services
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(from.Address, string.Empty)
+                    Credentials = new NetworkCredential(from.Address, Pass)
                 };
 
                 message = new MailMessage(from, to)
