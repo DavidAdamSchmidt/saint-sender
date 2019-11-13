@@ -9,6 +9,7 @@ namespace SaintSender.DesktopUI.ViewModels
     public class MainWindowModel : ViewModelBase
     {
         private string _email;
+        private bool _loggingOut;
 
         public MainWindowModel()
         {
@@ -19,6 +20,8 @@ namespace SaintSender.DesktopUI.ViewModels
         public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
 
         public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
+
+        public bool IsLoggingOut { get => _loggingOut; set => SetProperty(ref _loggingOut, value); }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -34,8 +37,8 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private async void GetMails()
         {
-            await EmailService.FillEmailCollection(Emails);
             UserEmail = EmailService.Email;
+            await EmailService.FillEmailCollection(Emails);
         }
 
         private void SetCommands()
@@ -48,10 +51,11 @@ namespace SaintSender.DesktopUI.ViewModels
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
         }
 
-        private void Exit_Execute(string throwAway)
+        private async void Exit_Execute(string throwAway)
         {
-            EmailService.Flush(Emails);
             UserEmail = string.Empty;
+            IsLoggingOut = true;
+            await EmailService.Flush(Emails);
         }
 
         private void PreviousPageShow_Execute(string throwAway)
@@ -67,16 +71,18 @@ namespace SaintSender.DesktopUI.ViewModels
             new ComposeWindow().ShowDialog();
         }
 
-        private void Logout_Execute(Button button)
+        private async void Logout_Execute(Button button)
         {
-            EmailService.Flush(Emails);
             UserEmail = string.Empty;
+            IsLoggingOut = true;
+            await EmailService.Flush(Emails);
 
             var loginWindow = new LoginWindow();
-            loginWindow.Show();
 
             var parentWindow = Window.GetWindow(button);
             parentWindow?.Close();
+
+            loginWindow.Show();
 
         }
 

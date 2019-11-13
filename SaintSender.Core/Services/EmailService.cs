@@ -63,6 +63,10 @@ namespace SaintSender.Core.Services
                 {
                     return false;
                 }
+                catch (ArgumentException)
+                {
+                    return false;
+                }
 
                 if (!ImapClient.IsAuthenticated)
                 {
@@ -176,7 +180,12 @@ namespace SaintSender.Core.Services
             return mail;
         }
 
-        public static void Flush(AsyncObservableCollection<CustoMail> Emails)
+        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToFlush(emails));
+        }
+
+        private static void TryToFlush(AsyncObservableCollection<CustoMail> emails)
         {
             using (ImapClient)
             {
@@ -184,7 +193,7 @@ namespace SaintSender.Core.Services
                 ImapClient.Authenticate(Email, _pass);
                 ImapClient.SelectInbox();
 
-                foreach (var mail in Emails)
+                foreach (var mail in emails)
                 {
                     if (!mail.IsRead)
                     {

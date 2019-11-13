@@ -7,12 +7,14 @@
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="MainWindow" ResizeMode="NoResize" >
     <Window.DataContext>
         <vm:MainWindowModel />
     </Window.DataContext>
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <conv:BooleanToFontWeightConverter x:Key="BoolToFont"/>
         <Style TargetType="local:MainWindow">
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -62,5 +64,7 @@
         <Button x:Name="Next" Margin="474,519,246,32" Width="74">
             _Next
         </Button>
+        <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48" Margin="599,41,147,482"
+                         Visibility="{Binding IsLoggingOut, Converter={StaticResource BooleanToVisibilityConverter}}" />
     </Grid>
 </Window>
