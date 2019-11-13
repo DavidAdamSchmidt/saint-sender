@@ -6,11 +6,11 @@
         xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="New e-mail" Height="450" Width="800" MinHeight="320" MinWidth="320">
     <Window.Resources>
         <system:Double x:Key="ControlHeight">24</system:Double>
-        <GridLength x:Key="RowHeight">44</GridLength>
         <vm:ComposeWindowModel x:Key="Model" />
         <Style TargetType="Label">
             <Setter Property="Height" Value="25" />
@@ -20,7 +20,9 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style TargetType="{x:Type Button}">
-            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0,0,15,0" />
             <Setter Property="Height" Value="{StaticResource ControlHeight}" />
             <Setter Property="Width" Value="70" />
         </Style>
@@ -31,10 +33,10 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="{StaticResource RowHeight}" />
-            <RowDefinition Height="{StaticResource RowHeight}" />
+            <RowDefinition Height="44" />
+            <RowDefinition Height="44" />
             <RowDefinition />
-            <RowDefinition Height="{StaticResource RowHeight}" />
+            <RowDefinition Height="66" />
         </Grid.RowDefinitions>
         <Label Target="{Binding ElementName=TxtBxRecipient}">_To:</Label>
         <TextBox x:Name="TxtBxRecipient" Grid.Column="1" Grid.Row="0" Style="{StaticResource Field}"
@@ -45,8 +47,11 @@
         <TextBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,0"
                  AcceptsReturn="True" TextWrapping="Wrap"
                  Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Command="{Binding SendButtonClickCommand}">
-            Send
-        </Button>
+        <WrapPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10">
+            <Button Command="{Binding SendButtonClickCommand}">
+                Send
+            </Button>
+            <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48" Visibility="Hidden" />
+        </WrapPanel>
     </Grid>
 </Window>
