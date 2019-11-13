@@ -66,7 +66,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void SendNew_Execute(string throwAway)
         {
-            //new ComposeWindow();
+            new ComposeWindow().ShowDialog();
         }
 
         private void Logout_Execute(Button button)
@@ -84,6 +84,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void ReadEmail_Execute(CustoMail email)
         {
+             email.IsRead = true;
              var emailDetailsDialog = new EmailDetailsWindow();
              emailDetailsDialog.DataContext = new EmailDetailsWindowModel(email);
              emailDetailsDialog.ShowDialog();
