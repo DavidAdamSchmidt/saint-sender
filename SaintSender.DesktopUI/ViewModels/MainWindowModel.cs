@@ -22,12 +22,12 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void GetMails()
         {
-            Emails = EmailService.GetEmails(1, 20);
+            Emails = EmailService.GetEmails();
             UserEmail = EmailService.Email;
         }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
-        
+
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
         public DelegateCommand<string> NextPageButtonCommand { get; private set; }

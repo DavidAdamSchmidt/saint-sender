@@ -9,7 +9,7 @@ namespace SaintSender.Core.Services
     public static class EmailService
     {
         private const string ImapHost = "imap.gmail.com";
-        private static string pass = string.Empty;
+        private static string Pass = string.Empty;
         private static readonly ImapClient ImapClient;
         public static string Email { get; set; }
 
@@ -44,20 +44,20 @@ namespace SaintSender.Core.Services
                 if (ImapClient.IsAuthenticated)
                 {
                     Email = email;
-                    pass = password;
+                    Pass = password;
                 }
 
                 return ImapClient.IsAuthenticated;
             }
         }
 
-        public static ObservableCollection<CustoMail> GetEmails(int offset, int limit)
+        public static ObservableCollection<CustoMail> GetEmails()
         {
             var emails = new ObservableCollection<CustoMail>();
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, pass);
+                ImapClient.Authenticate(Email, Pass);
                 ImapClient.SelectInbox();
 
                 var unseens = ImapClient.SearchMessageUids("Unseen");
@@ -92,7 +92,7 @@ namespace SaintSender.Core.Services
             mail.Cc = clientMail.Cc;
             mail.BodyHtml = clientMail.BodyHtml;
             mail.TextBody = clientMail.BodyText;
-            mail.Sender = clientMail.Sender;
+            mail.Sender = clientMail.From;
             mail.Subject = clientMail.Subject;
             mail.To = clientMail.To;
             mail.Date = clientMail.Date;
@@ -106,7 +106,7 @@ namespace SaintSender.Core.Services
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, pass);
+                ImapClient.Authenticate(Email, Pass);
                 ImapClient.SelectInbox();
 
                 foreach (var mail in Emails)

@@ -11,7 +11,7 @@ namespace SaintSender.Core.Entities
 {
     public class CustoMail
     {
-        public MailAddress Sender { get; set; }
+        public MailAddressCollection Sender { get; set; }
 
         public MailAddressCollection To { get; set; }
 
@@ -32,6 +32,8 @@ namespace SaintSender.Core.Entities
         public int MessageNumber { get; set; }
 
         public DateTime Date { get; set; }
+
+        public string From { get => Sender.SingleOrDefault().ToString(); }
 
     }
 }
