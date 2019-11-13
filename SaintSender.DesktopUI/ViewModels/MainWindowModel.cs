@@ -1,30 +1,25 @@
 ﻿using SaintSender.Core.Entities;
-using SaintSender.Core.Interfaces;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
-using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    class MainWindowModel : ViewModelBase
+    public class MainWindowModel : ViewModelBase
     {
+        private string _email;
+
         public MainWindowModel()
         {
             GetMails();
             SetCommands();
         }
-        private string _email;
-        public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
+
         public ObservableCollection<CustoMail> Emails { get; private set; } = new ObservableCollection<CustoMail>();
 
-        private void GetMails()
-        {
-            Emails = EmailService.GetEmails();
-            UserEmail = EmailService.Email;
-        }
+        public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -38,7 +33,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
-
+        private void GetMails()
+        {
+            Emails = EmailService.GetEmails();
+            UserEmail = EmailService.Email;
+        }
 
         private void SetCommands()
         {
@@ -85,8 +84,10 @@ namespace SaintSender.DesktopUI.ViewModels
         private void ReadEmail_Execute(CustoMail email)
         {
              email.IsRead = true;
-             var emailDetailsDialog = new EmailDetailsWindow();
-             emailDetailsDialog.DataContext = new EmailDetailsWindowModel(email);
+             var emailDetailsDialog = new EmailDetailsWindow
+             {
+                 DataContext = new EmailDetailsWindowModel(email)
+             };
              emailDetailsDialog.ShowDialog();
         }
     }

@@ -16,15 +16,16 @@ namespace SaintSender.Core.Services
     {
         private const string ImapHost = "imap.gmail.com";
         private const string SmtpHost = "smtp.gmail.com";
-        private static string Pass = string.Empty;
         private static readonly ImapClient ImapClient;
-        public static string Email { get; set; }
+        private static string _pass = string.Empty;
 
         static EmailService()
         {
             ComponentInfo.SetLicense("FREE-LIMITED-KEY");
             ImapClient = new ImapClient(ImapHost);
         }
+
+        public static string Email { get; set; }
 
         public static bool Authenticate(string email, string password)
         {
@@ -48,11 +49,13 @@ namespace SaintSender.Core.Services
                     return false;
                 }
 
-                if (ImapClient.IsAuthenticated)
+                if (!ImapClient.IsAuthenticated)
                 {
-                    Email = email;
-                    Pass = password;
+                    return ImapClient.IsAuthenticated;
                 }
+
+                Email = email;
+                _pass = password;
 
                 return ImapClient.IsAuthenticated;
             }
@@ -82,7 +85,7 @@ namespace SaintSender.Core.Services
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(from.Address, Pass)
+                    Credentials = new NetworkCredential(from.Address, _pass)
                 };
 
                 message = new MailMessage(from, to)
@@ -120,7 +123,7 @@ namespace SaintSender.Core.Services
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, Pass);
+                ImapClient.Authenticate(Email, _pass);
                 ImapClient.SelectInbox();
 
                 var unseens = ImapClient.SearchMessageUids("Unseen");
@@ -148,19 +151,21 @@ namespace SaintSender.Core.Services
 
         private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)
         {
-            var mail = new CustoMail();
+            var mail = new CustoMail
+            {
+                Attachments = clientMail.Attachments,
+                Bcc = clientMail.Bcc,
+                Cc = clientMail.Cc,
+                BodyHtml = clientMail.BodyHtml,
+                TextBody = clientMail.BodyText,
+                Sender = clientMail.From,
+                Subject = clientMail.Subject,
+                To = clientMail.To,
+                Date = clientMail.Date,
+                IsRead = readOrNot
+            };
 
-            mail.Attachments = clientMail.Attachments;
-            mail.Bcc = clientMail.Bcc;
-            mail.Cc = clientMail.Cc;
-            mail.BodyHtml = clientMail.BodyHtml;
-            mail.TextBody = clientMail.BodyText;
-            mail.Sender = clientMail.From;
-            mail.Subject = clientMail.Subject;
-            mail.To = clientMail.To;
-            mail.Date = clientMail.Date;
 
-            mail.IsRead = readOrNot;
             return mail;
         }
 
@@ -169,14 +174,14 @@ namespace SaintSender.Core.Services
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, Pass);
+                ImapClient.Authenticate(Email, _pass);
                 ImapClient.SelectInbox();
 
                 foreach (var mail in Emails)
                 {
                     if (!mail.IsRead)
                     {
-                    ImapClient.SetMessageFlags(mail.MessageNumber, new string[] { "Unseen" });
+                        ImapClient.SetMessageFlags(mail.MessageNumber, "Unseen");
                     }
                 }
             }
