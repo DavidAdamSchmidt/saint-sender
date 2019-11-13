@@ -3,20 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:converters="clr-namespace:SaintSender.DesktopUI.Converters"
-        xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         mc:Ignorable="d"
         Title="Email details" Height="450" Width="550"
         WindowStartupLocation="CenterScreen"
         MinWidth="250"
         MinHeight="200">
     <Window.Resources>
-        <vm:EmailDetailsWindowModel x:Key="Model"/>
         <converters:DateTimeConverterForEmailDate x:Key="DateTimeConverter"/>
     </Window.Resources>
-    <Grid DataContext="{StaticResource Model}">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="4*" />
@@ -34,13 +30,13 @@
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="1" Width="Auto" Margin="0,0,15,0">
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbSender"
-                       Text="{Binding Email.Sender}" />
+                       Text="{Binding Email.From}" />
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbSubject"
                        Text="{Binding Email.Subject}" />
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbDate" 
                        Text="{Binding Email.Date, Converter={StaticResource DateTimeConverter}}" />
         </StackPanel>
-        <TextBox Name="TbMessage" IsReadOnly="True" Text="{Binding Email.BodyText}" Grid.Row="1" Grid.ColumnSpan="2"
+        <TextBox Name="TbMessage" IsReadOnly="True" Text="{Binding Email.TextBody}" Grid.Row="1" Grid.ColumnSpan="2"
                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="15,0,15,5" />
         <Button Name="BtnClose" Grid.Row="2" Grid.ColumnSpan="2" Width="50" Height="20" 
                 Command="{Binding CloseButtonClickCommand}" CommandParameter="{Binding ElementName=BtnClose}" >
