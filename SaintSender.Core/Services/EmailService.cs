@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -37,9 +38,9 @@ namespace SaintSender.Core.Services
             return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
         }
 
-        public static async Task FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
+        public static async Task<bool> FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
         {
-            await Task.Factory.StartNew(() => TryToGetEmails(emails));
+            return await Task.Factory.StartNew(() => TryToGetEmails(emails));
         }
 
         private static bool TryToAuthenticate(string email, string password)
@@ -131,11 +132,11 @@ namespace SaintSender.Core.Services
                    ex is FormatException;
         }
 
-        private static void TryToGetEmails(ICollection<CustoMail> emails)
+        private static bool TryToGetEmails(ICollection<CustoMail> emails)
         {
             if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
             {
-                return;
+                return false;
             }
 
             using (ImapClient)
@@ -147,22 +148,28 @@ namespace SaintSender.Core.Services
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
-                foreach (var mailNum in unseens)
+                try
                 {
-                    var clientMail = ImapClient.GetMessage(int.Parse(mailNum));
-                    var custoMail = EmailConverter(clientMail, false);
-                    custoMail.MessageNumber = int.Parse(mailNum);
-                    emails.Add(custoMail);
-                }
+                    FillEmailCollection(unseens, emails, false);
+                    FillEmailCollection(seens, emails, true);
 
-                foreach (var mailNum in seens)
+                    return true;
+                }
+                catch (FreeLimitReachedException)
                 {
-                    var clientMail = ImapClient.GetMessage(int.Parse(mailNum));
-                    var custoMail = EmailConverter(clientMail, true);
-                    custoMail.MessageNumber = int.Parse(mailNum);
-                    emails.Add(custoMail);
+                    return false;
                 }
+            }
+        }
 
+        private static void FillEmailCollection(IEnumerable<string> ids, ICollection<CustoMail> emails, bool readOrNot)
+        {
+            foreach (var id in ids)
+            {
+                var clientMail = ImapClient.GetMessage(int.Parse(id));
+                var custoMail = EmailConverter(clientMail, readOrNot);
+                custoMail.MessageNumber = int.Parse(id);
+                emails.Add(custoMail);
             }
         }
 

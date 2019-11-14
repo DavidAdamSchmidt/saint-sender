@@ -6,16 +6,19 @@ using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    class MainWindowModel : Base
+    public class MainWindowModel : Base
     {
         private string _email;
         private bool _loadingEmails;
         private bool _loggingOut;
+        private bool _maxRefreshCapacityReached;
 
         public MainWindowModel()
         {
             SetCommands();
-            GetMails();
+
+            UserEmail = EmailService.Email;
+            SetEmails();
         }
 
         public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
@@ -36,7 +39,8 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             get => _loggingOut;
             set => SetProperty(ref _loggingOut, value);
-            }
+
+        }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -50,6 +54,8 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
+        public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
+
         protected override void SetProperty<T>(ref T storage, T value, string propertyName = null)
         {
             base.SetProperty(ref storage, value, propertyName);
@@ -58,19 +64,23 @@ namespace SaintSender.DesktopUI.ViewModels
             PreviousPageButtonCommand.RaiseCanExecuteChanged();
             NextPageButtonCommand.RaiseCanExecuteChanged();
             LogoutButtonClickCommand.RaiseCanExecuteChanged();
+            RefreshButtonClickCommand.RaiseCanExecuteChanged();
         }
 
-        private async void GetMails()
+        private async void SetEmails()
         {
-            UserEmail = EmailService.Email;
-
             IsLoadingEmails = true;
 
-            await EmailService.FillEmailCollection(Emails);
+            _maxRefreshCapacityReached = !await EmailService.FillEmailCollection(Emails);
+
+            if (_maxRefreshCapacityReached)
+            {
+                MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
+                    "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
 
             IsLoadingEmails = false;
         }
-        public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
 
         private void SetCommands()
         {
@@ -81,13 +91,7 @@ namespace SaintSender.DesktopUI.ViewModels
             PreviousPageButtonCommand =
                 new DelegateCommand<string>(PreviousPageShow_Execute, PreviousPageShow_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
-            RefreshButtonClickCommand = new DelegateCommand<string>(RefreshCurrent_Execute);
-        }
-
-        private async void RefreshCurrent_Execute(string obj)
-        {
-            await EmailService.Flush(Emails);
-            await EmailService.FillEmailCollection(Emails);
+            RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
         }
 
         private async void Exit_Execute(string throwAway)
@@ -152,6 +156,17 @@ namespace SaintSender.DesktopUI.ViewModels
                 DataContext = new EmailDetailsWindowModel(email)
             };
             emailDetailsDialog.ShowDialog();
+        }
+
+        private void RefreshEmails_Execute(string throwAway)
+        {
+            Emails.Clear();
+            SetEmails();
+        }
+
+        private bool RefreshEmails_CanExecute(string throwAway)
+        {
+            return !_maxRefreshCapacityReached && SetButtonAvailability();
         }
 
         private bool SetButtonAvailability()
