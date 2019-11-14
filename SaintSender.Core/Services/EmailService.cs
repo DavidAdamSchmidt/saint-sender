@@ -133,6 +133,11 @@ namespace SaintSender.Core.Services
 
         private static void TryToGetEmails(ICollection<CustoMail> emails)
         {
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
+            {
+                return;
+            }
+
             using (ImapClient)
             {
                 ImapClient.Connect();
