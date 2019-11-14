@@ -81,7 +81,7 @@ namespace SaintSender.DesktopUI.ViewModels
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
-            ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
+            ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
         }
 
@@ -99,7 +99,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool SendNew_CanExecute(string throwAway)
         {
-            return SetButtonAvailability();
+            return SetCommandAvailability();
         }
 
         private async void Logout_Execute(Button button)
@@ -118,7 +118,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool Logout_CanExecute(Button button)
         {
-            return SetButtonAvailability();
+            return SetCommandAvailability();
         }
 
         private void ReadEmail_Execute(CustoMail email)
@@ -131,6 +131,11 @@ namespace SaintSender.DesktopUI.ViewModels
             emailDetailsDialog.ShowDialog();
         }
 
+        private bool ReadEmail_CanExecute(CustoMail email)
+        {
+            return SetCommandAvailability();
+        }
+
         private void RefreshEmails_Execute(string throwAway)
         {
             Emails.Clear();
@@ -139,10 +144,10 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool RefreshEmails_CanExecute(string throwAway)
         {
-            return !_maxRefreshCapacityReached && SetButtonAvailability();
+            return !_maxRefreshCapacityReached && SetCommandAvailability();
         }
 
-        private bool SetButtonAvailability()
+        private bool SetCommandAvailability()
         {
             return !_loadingEmails && !_loggingOut;
         }
