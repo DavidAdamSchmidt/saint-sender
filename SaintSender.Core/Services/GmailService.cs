@@ -18,9 +18,9 @@ namespace SaintSender.Core.Services
         private const string SmtpHost = "smtp.gmail.com";
         private static readonly ImapClient ImapClient;
 
-        public static string Email => EncryptionService.RetrieveData()[0];
+        public static string Email => EncryptionService.RetrieveData().Email;
 
-        private static string Password => EncryptionService.RetrieveData()[1];
+        private static string Password => EncryptionService.RetrieveData().Password;
 
         static GmailService()
         {

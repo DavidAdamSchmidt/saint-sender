@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
@@ -11,7 +12,7 @@ namespace SaintSender.DesktopUI.ViewModels
     {
         private string _email;
         private bool _sending;
-        private readonly Dictionary<string, string> _userData;
+        private readonly IList<UserInfo> _userData;
 
         public LoginWindowModel()
         {
@@ -40,7 +41,7 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
-        public Dictionary<string, string>.KeyCollection Users => _userData.Keys;
+        public IList<string> Users => (from user in _userData select user.Email).ToList();
 
         public string SelectedUser { get; set; }
 
@@ -63,7 +64,17 @@ namespace SaintSender.DesktopUI.ViewModels
         private void AutoFillLoginDetails_Execute(PasswordBox passwordBox)
         {
             Email = SelectedUser;
-            passwordBox.Password = _userData[SelectedUser];
+
+            foreach (var user in _userData)
+            {
+                if (!user.Email.Equals(SelectedUser))
+                {
+                    continue;
+                }
+
+                passwordBox.Password = user.Password;
+                break;
+            }
         }
 
         private void CancelLogin_Execute(PasswordBox passwordBox)

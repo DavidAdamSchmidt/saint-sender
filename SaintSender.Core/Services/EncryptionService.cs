@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
+using SaintSender.Core.Entities;
 
 namespace SaintSender.Core.Services
 {
@@ -74,27 +75,31 @@ namespace SaintSender.Core.Services
             EncryptFile();
         }
 
-        public static string[] RetrieveData()
+        public static UserInfo RetrieveData()
         {
-            var retrieveDataOne = string.Empty;
-            var retrieveDataTwo = string.Empty;
+            UserInfo userInfo = null;
 
             var formatter = new BinaryFormatter();
             using (var fileStream = new FileStream(DecryptFile(_filePath), FileMode.Open, FileAccess.Read))
             {
                 if (fileStream.Length != 0)
                 {
-                    retrieveDataOne = RsaDecrypt((string)formatter.Deserialize(fileStream));
-                    retrieveDataTwo = RsaDecrypt((string)formatter.Deserialize(fileStream));
+                    userInfo = new UserInfo
+                    {
+                        Email = RsaDecrypt((string) formatter.Deserialize(fileStream)),
+                        Password = RsaDecrypt((string) formatter.Deserialize(fileStream))
+
+                    };
                 }
                 EncryptFile();
             }
-            return new[] { retrieveDataOne, retrieveDataTwo };
+
+            return userInfo;
         }
 
-        public static Dictionary<string, string> RetrieveAllData()
+        public static IList<UserInfo> RetrieveAllData()
         {
-            var userData = new Dictionary<string, string>();
+            var userData = new List<UserInfo>();
             var directory = CreateDirectory();
             var filePaths = Directory.GetFiles(directory).ToList();
 
@@ -102,9 +107,9 @@ namespace SaintSender.Core.Services
             {
                 _filePath = file;
                 var userInfo = RetrieveData();
-                if (!string.IsNullOrEmpty(userInfo[0]))
+                if (!string.IsNullOrEmpty(userInfo.Email))
                 {
-                    userData.Add(userInfo[0], userInfo[1]);
+                    userData.Add(userInfo);
                 }
             }
 
