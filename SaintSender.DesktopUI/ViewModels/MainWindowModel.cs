@@ -23,27 +23,20 @@ namespace SaintSender.DesktopUI.ViewModels
         public string UserEmail
         {
             get => _email;
-            set => SetProperty(ref _email, value);
+            set => SetProperty(ref _email, string.IsNullOrEmpty(value) ? value : $"Hello, {value}");
         }
 
         public bool IsLoadingEmails
         {
             get => _loadingEmails;
-            set
-            {
-                SetProperty(ref _loadingEmails, value);
-                SendNewButtonClickCommand.RaiseCanExecuteChanged();
-                PreviousPageButtonCommand.RaiseCanExecuteChanged();
-                NextPageButtonCommand.RaiseCanExecuteChanged();
-                LogoutButtonClickCommand.RaiseCanExecuteChanged();
-            }
+            set => SetProperty(ref _loadingEmails, value);
         }
 
         public bool IsLoggingOut
         {
             get => _loggingOut;
             set => SetProperty(ref _loggingOut, value);
-        }
+            }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -56,6 +49,16 @@ namespace SaintSender.DesktopUI.ViewModels
         public DelegateCommand<CustoMail> ReadDoubleClickedEmail { get; private set; }
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
+
+        protected override void SetProperty<T>(ref T storage, T value, string propertyName = null)
+        {
+            base.SetProperty(ref storage, value, propertyName);
+
+            SendNewButtonClickCommand.RaiseCanExecuteChanged();
+            PreviousPageButtonCommand.RaiseCanExecuteChanged();
+            NextPageButtonCommand.RaiseCanExecuteChanged();
+            LogoutButtonClickCommand.RaiseCanExecuteChanged();
+        }
 
         private async void GetMails()
         {
@@ -88,12 +91,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void PreviousPageShow_Execute(string throwAway)
         {
-            MessageBox.Show("");
         }
 
         private bool PreviousPageShow_CanExecute(string throwAway)
         {
-            return !_loadingEmails;
+            return SetButtonAvailability();
         }
 
         private void NextPageShow_Execute(string throwAway)
@@ -102,7 +104,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool NextPageShow_CanExecute(string throwAway)
         {
-            return !_loadingEmails;
+            return SetButtonAvailability();
         }
 
         private void SendNew_Execute(string throwAway)
@@ -112,7 +114,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool SendNew_CanExecute(string throwAway)
         {
-            return !_loadingEmails;
+            return SetButtonAvailability();
         }
 
         private async void Logout_Execute(Button button)
@@ -131,7 +133,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool Logout_CanExecute(Button button)
         {
-            return !_loadingEmails;
+            return SetButtonAvailability();
         }
 
         private void ReadEmail_Execute(CustoMail email)
@@ -142,6 +144,11 @@ namespace SaintSender.DesktopUI.ViewModels
                 DataContext = new EmailDetailsWindowModel(email)
             };
             emailDetailsDialog.ShowDialog();
+        }
+
+        private bool SetButtonAvailability()
+        {
+            return !_loadingEmails && !_loggingOut;
         }
     }
 }
