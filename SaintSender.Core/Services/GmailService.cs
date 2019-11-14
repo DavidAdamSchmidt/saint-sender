@@ -9,6 +9,8 @@ using MailAddress = System.Net.Mail.MailAddress;
 using MailMessage = System.Net.Mail.MailMessage;
 using GemBoxMail = GemBox.Email.MailMessage;
 using SaintSender.Core.Entities;
+using System.IO;
+using System.Windows;
 
 namespace SaintSender.Core.Services
 {
@@ -152,6 +154,7 @@ namespace SaintSender.Core.Services
                 ImapClient.Authenticate(Email, Password);
                 ImapClient.SelectInbox();
 
+                
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
@@ -215,6 +218,55 @@ namespace SaintSender.Core.Services
                     }
                 }
             }
+        }
+
+        public static void DeleteEmail(CustoMail mail)
+        {
+            var currentDirectory = Directory.GetCurrentDirectory() + @"\SavedEmails";
+            var files = Directory.GetFiles(currentDirectory);
+            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            foreach (var file in files)
+            {
+                if (file.EndsWith($@"\{fileName}.txt"))
+                {
+                    File.Delete(file);
+                    break;
+                }
+            }
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+                ImapClient.DeleteMessage(mail.MessageNumber, true);
+            }
+        }
+
+        public static void SaveEmailToFile(CustoMail mail)
+        {
+            var currentDirectory = Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"\SavedEmails");
+            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            var filePath = currentDirectory.FullName + $@"\{fileName}.txt";
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Dispose();
+            }
+
+            var notificationMessage = string.IsNullOrEmpty(File.ReadAllText(filePath)) ? "Your E-Mail has been successfully saved!" : "Your saved E-mail has been successfully overwritten!";
+            
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+                ImapClient.SaveMessage(mail.MessageNumber, filePath);
+            }
+            MessageBox.Show(notificationMessage, "E-Mail Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToFlush(emails));
         }
     }
 }
