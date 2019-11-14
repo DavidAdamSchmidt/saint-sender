@@ -3,12 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:converters="clr-namespace:SaintSender.DesktopUI.Converters"
+        xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         mc:Ignorable="d"
         Title="Email details" Height="450" Width="550" MinWidth="350" MinHeight="350"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <converters:DateTimeConverterForEmailDate x:Key="DateTimeConverter"/>
+        <conv:DateTimeConverterForEmailDate x:Key="DateTimeConverter"/>
     </Window.Resources>
     <Grid Margin="30,50">
         <Grid.ColumnDefinitions>

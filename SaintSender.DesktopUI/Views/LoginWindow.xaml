@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI"
+        xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
@@ -15,7 +16,7 @@
         <vm:LoginWindowModel />
     </Window.DataContext>
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <Style TargetType="{x:Type WrapPanel}">
             <Setter Property="Margin" Value="10" />
             <Setter Property="HorizontalAlignment" Value="Center" />

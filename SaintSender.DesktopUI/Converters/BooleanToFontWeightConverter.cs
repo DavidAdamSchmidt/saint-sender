@@ -9,16 +9,12 @@ namespace SaintSender.DesktopUI.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(bool)value)
-            {
-                return FontWeights.Bold;
-            }
-            return FontWeights.Normal;
+            return value is bool b && b ? FontWeights.Normal : FontWeights.Bold;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value.ToString();
+            return value is FontWeight f && f == FontWeights.Normal;
         }
     }
 }
