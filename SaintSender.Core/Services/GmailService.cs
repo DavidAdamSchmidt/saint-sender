@@ -50,6 +50,10 @@ namespace SaintSender.Core.Services
                 return false;
             }
 
+            if (!email.EndsWith("@gmail.com"))
+            {
+                email += "@gmail.com";
+            }
 
             using (ImapClient)
             {
