@@ -5,30 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:SaintSender.DesktopUI.Converters"
         mc:Ignorable="d"
-        Title="Email details" Height="450" Width="550"
-        WindowStartupLocation="CenterScreen"
-        MinWidth="250"
-        MinHeight="200">
+        Title="Email details" Height="450" Width="550" MinWidth="350" MinHeight="350"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <converters:DateTimeConverterForEmailDate x:Key="DateTimeConverter"/>
     </Window.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="70"/>
-            <RowDefinition Height="4*" />
-            <RowDefinition Height="30" />
-        </Grid.RowDefinitions>
+    <Grid Margin="30,50">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="65"/>
             <ColumnDefinition Width="7*" />
         </Grid.ColumnDefinitions>
-        <StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="14*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <StackPanel >
             <TextBlock Margin="10,0,0,0">Sender:</TextBlock>
             <TextBlock Margin="10,0,0,0">Subject:</TextBlock>
             <TextBlock Margin="10,0,0,0">Date:</TextBlock>
-            <TextBlock Margin="10,0,0,0">Message:</TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Width="Auto" Margin="0,0,15,0">
+        <StackPanel Grid.Column="1" Grid.Row="0" Width="Auto" Margin="0,0,15,0">
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbSender"
                        Text="{Binding Email.From}" />
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbSubject"
@@ -36,9 +33,11 @@
             <TextBlock Width="Auto" HorizontalAlignment="Left" TextTrimming="WordEllipsis" Name="TbDate" 
                        Text="{Binding Email.Date, Converter={StaticResource DateTimeConverter}}" />
         </StackPanel>
-        <TextBox Name="TbMessage" IsReadOnly="True" Text="{Binding Email.TextBody}" Grid.Row="1" Grid.ColumnSpan="2"
-                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="15,0,15,5" />
-        <Button Name="BtnClose" Grid.Row="2" Grid.ColumnSpan="2" Width="50" Height="20" 
+        <TextBox Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" IsReadOnly="True" Text="{Binding Email.TextBody}"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 Margin="10,0,10,5" Padding="5" />
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Name="BtnClose"
+                Width="75" Height="20" VerticalAlignment="Bottom"
                 Command="{Binding CloseButtonClickCommand}" CommandParameter="{Binding ElementName=BtnClose}" >
             Close
         </Button>
