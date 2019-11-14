@@ -247,7 +247,12 @@ namespace SaintSender.Core.Services
             }
         }
 
-        public static void SaveEmailToFile(CustoMail mail)
+        public static async Task<bool> SaveEmailToFile(CustoMail mail)
+        {
+            return await Task.Factory.StartNew(() => TryToSaveEmailToFile(mail));
+        }
+
+        private static bool TryToSaveEmailToFile(CustoMail mail)
         {
             var currentDirectory = Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"\SavedEmails");
             var fileName = string.Concat(mail.MessageNumber, mail.Subject);
@@ -257,8 +262,8 @@ namespace SaintSender.Core.Services
                 File.Create(filePath).Dispose();
             }
 
-            var notificationMessage = string.IsNullOrEmpty(File.ReadAllText(filePath)) ? "Your E-Mail has been successfully saved!" : "Your saved E-mail has been successfully overwritten!";
-            
+            var overwritten = !string.IsNullOrEmpty(File.ReadAllText(filePath));
+
             using (ImapClient)
             {
                 ImapClient.Connect();
@@ -266,7 +271,8 @@ namespace SaintSender.Core.Services
                 ImapClient.SelectInbox();
                 ImapClient.SaveMessage(mail.MessageNumber, filePath);
             }
-            MessageBox.Show(notificationMessage, "E-Mail Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            return overwritten;
         }
 
         public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
