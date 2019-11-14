@@ -1,5 +1,4 @@
-﻿using System;
-using SaintSender.Core.Interfaces;
+﻿using SaintSender.Core.Interfaces;
 
 namespace SaintSender.Core.Services
 {

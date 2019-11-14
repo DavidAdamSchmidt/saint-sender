@@ -1,11 +1,6 @@
 ﻿using GemBox.Email;
-using GemBox.Email.Imap;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace SaintSender.Core.Entities
 {
@@ -34,7 +29,6 @@ namespace SaintSender.Core.Entities
 
         public DateTime Date { get; set; }
 
-        public string From { get => Sender.SingleOrDefault().ToString(); }
-
+        public string From => Sender.SingleOrDefault()?.ToString();
     }
 }

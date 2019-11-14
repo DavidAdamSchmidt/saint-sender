@@ -52,7 +52,6 @@
     <Compile Include="Entities\Base.cs" />
     <Compile Include="Entities\CustoMail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
-    <Compile Include="Services\Utils.cs" />
     <Compile Include="Services\EmailService.cs" />
     <Compile Include="Services\GreetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
