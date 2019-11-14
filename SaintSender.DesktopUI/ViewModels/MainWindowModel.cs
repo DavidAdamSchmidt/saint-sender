@@ -46,10 +46,6 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
-        public DelegateCommand<string> NextPageButtonCommand { get; private set; }
-
-        public DelegateCommand<string> PreviousPageButtonCommand { get; private set; }
-
         public DelegateCommand<CustoMail> ReadDoubleClickedEmail { get; private set; }
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
@@ -61,8 +57,6 @@ namespace SaintSender.DesktopUI.ViewModels
             base.SetProperty(ref storage, value, propertyName);
 
             SendNewButtonClickCommand.RaiseCanExecuteChanged();
-            PreviousPageButtonCommand.RaiseCanExecuteChanged();
-            NextPageButtonCommand.RaiseCanExecuteChanged();
             LogoutButtonClickCommand.RaiseCanExecuteChanged();
             RefreshButtonClickCommand.RaiseCanExecuteChanged();
         }
@@ -87,9 +81,6 @@ namespace SaintSender.DesktopUI.ViewModels
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
-            NextPageButtonCommand = new DelegateCommand<string>(NextPageShow_Execute, NextPageShow_CanExecute);
-            PreviousPageButtonCommand =
-                new DelegateCommand<string>(PreviousPageShow_Execute, PreviousPageShow_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
         }
@@ -99,24 +90,6 @@ namespace SaintSender.DesktopUI.ViewModels
             UserEmail = string.Empty;
             IsLoggingOut = true;
             await EmailService.Flush(Emails);
-        }
-
-        private void PreviousPageShow_Execute(string throwAway)
-        {
-        }
-
-        private bool PreviousPageShow_CanExecute(string throwAway)
-        {
-            return SetButtonAvailability();
-        }
-
-        private void NextPageShow_Execute(string throwAway)
-        {
-        }
-
-        private bool NextPageShow_CanExecute(string throwAway)
-        {
-            return SetButtonAvailability();
         }
 
         private void SendNew_Execute(string throwAway)
