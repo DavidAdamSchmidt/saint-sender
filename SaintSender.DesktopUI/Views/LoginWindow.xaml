@@ -11,9 +11,11 @@
         Title="SaintSender"
         Height="320" Width="320" MinHeight="280" MinWidth="200" MaxHeight="400" MaxWidth="600"
         WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <vm:LoginWindowModel />
+    </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <vm:LoginWindowModel x:Key="Model" />
         <Style TargetType="{x:Type WrapPanel}">
             <Setter Property="Margin" Value="10" />
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -32,7 +34,11 @@
             <Setter Property="Margin" Value="12,10" />
         </Style>
     </Window.Resources>
-    <StackPanel DataContext="{StaticResource Model}" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding SignInButtonClickCommand}"
+                    CommandParameter="{Binding ElementName=PwBxPassword}" Key="Enter" />
+    </Window.InputBindings>
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
         <WrapPanel>
             <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
             <TextBox x:Name="TxtBxEmail" Style="{StaticResource Input}"
@@ -50,10 +56,10 @@
         </WrapPanel>
         <WrapPanel>
             <Button Command="{Binding SignInButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
-                Sign in
+                _Sign in
             </Button>
             <Button Command="{Binding CancelButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
-                Cancel
+                _Cancel
             </Button>
         </WrapPanel>
         <TextBlock Height="48" Width="48">
