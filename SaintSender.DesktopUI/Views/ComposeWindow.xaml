@@ -49,7 +49,7 @@
                  AcceptsReturn="True" TextWrapping="Wrap"
                  Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" />
         <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,10" Orientation="Horizontal">
-            <Button Command="{Binding SendButtonClickCommand}">
+            <Button x:Name="BtnSend" Command="{Binding SendButtonClickCommand}" CommandParameter="{Binding ElementName=BtnSend}">
                 Send
             </Button>
             <Button Command="{Binding CancelButtonClickCommand}">

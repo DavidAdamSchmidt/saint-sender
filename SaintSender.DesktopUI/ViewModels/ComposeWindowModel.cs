@@ -1,6 +1,7 @@
 ﻿using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -40,7 +41,7 @@ namespace SaintSender.DesktopUI.ViewModels
             set => SetProperty(ref _sending, value);
         }
 
-        public DelegateCommand<string> SendButtonClickCommand { get; private set; }
+        public DelegateCommand<Button> SendButtonClickCommand { get; private set; }
 
         public DelegateCommand<string> CancelButtonClickCommand { get; private set; }
 
@@ -54,11 +55,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void SetCommands()
         {
-            SendButtonClickCommand = new DelegateCommand<string>(SendEmail_Execute, SendEmail_CanExecute);
+            SendButtonClickCommand = new DelegateCommand<Button>(SendEmail_Execute, SendEmail_CanExecute);
             CancelButtonClickCommand = new DelegateCommand<string>(CancelInput_Execute, CancelInput_CanExecute);
         }
 
-        private async void SendEmail_Execute(string s)
+        private async void SendEmail_Execute(Button button)
         {
             IsSending = true;
 
@@ -70,6 +71,9 @@ namespace SaintSender.DesktopUI.ViewModels
             {
                 MessageBox.Show($"Your e-mail has bent sent to {_recipient}", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
+
+                var window = Window.GetWindow(button);
+                window?.Close();
             }
             else
             {
@@ -78,7 +82,7 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
-        private bool SendEmail_CanExecute(string s)
+        private bool SendEmail_CanExecute(Button button)
         {
             return !string.IsNullOrWhiteSpace(_recipient) &&
                    !string.IsNullOrWhiteSpace(_subject) &&
