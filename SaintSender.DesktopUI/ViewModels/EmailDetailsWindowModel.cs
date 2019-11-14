@@ -14,6 +14,9 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<Button> DeleteButtonClickCommand { get; private set; }
 
+        public DelegateCommand<Button> SaveToFileClickCommand { get; private set; }
+
+
         public EmailDetailsWindowModel(CustoMail mail)
         {
             Email = mail;
@@ -26,11 +29,17 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             CloseButtonClickCommand = new DelegateCommand<Button>(CloseEmailDetailsWindow_Execute);
             DeleteButtonClickCommand = new DelegateCommand<Button>(DeleteCurrentEmail_Execute);
+            SaveToFileClickCommand = new DelegateCommand<Button>(SaveToFile_Execute);
+        }
+
+        private void SaveToFile_Execute(Button button)
+        {
+            GmailService.SaveEmailToFile(Email);
         }
 
         private void DeleteCurrentEmail_Execute(Button button)
         {
-            GmailService.DeleteEmail(Email.MessageNumber);
+            GmailService.DeleteEmail(Email);
             var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             var windowModel = (MainWindowModel)mainWindow.DataContext;
             windowModel.Emails.Remove(Email);
