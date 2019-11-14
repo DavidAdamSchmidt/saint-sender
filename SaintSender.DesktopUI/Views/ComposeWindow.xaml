@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SaintSender.DesktopUI.Views"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
-        xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="New e-mail" Height="450" Width="800" MinHeight="320" MinWidth="320">
+        Title="New E-mail - SaintSender"
+        Height="450" Width="800" MinHeight="320" MinWidth="320"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <vm:ComposeWindowModel x:Key="Model" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

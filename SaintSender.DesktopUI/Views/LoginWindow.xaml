@@ -9,7 +9,7 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="SaintSender"
+        Title="Login - SaintSender"
         Height="320" Width="320" MinHeight="300" MinWidth="200" MaxHeight="400" MaxWidth="600"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
