@@ -220,7 +220,12 @@ namespace SaintSender.Core.Services
             }
         }
 
-        public static void DeleteEmail(CustoMail mail)
+        public static async Task DeleteEmail(CustoMail mail)
+        {
+            await Task.Factory.StartNew(() => TryToDeleteEmail(mail));
+        }
+
+        private static void TryToDeleteEmail(CustoMail mail)
         {
             var currentDirectory = Directory.GetCurrentDirectory() + @"\SavedEmails";
             var files = Directory.GetFiles(currentDirectory);
