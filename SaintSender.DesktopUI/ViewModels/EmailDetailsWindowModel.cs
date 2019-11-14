@@ -32,16 +32,29 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<Button> SaveToFileClickCommand { get; private set; }
 
+        protected override void SetProperty<T>(ref T storage, T value, string propertyName = null)
+        {
+            base.SetProperty(ref storage, value, propertyName);
+            CloseButtonClickCommand.RaiseCanExecuteChanged();
+            DeleteButtonClickCommand.RaiseCanExecuteChanged();
+            SaveToFileClickCommand.RaiseCanExecuteChanged();
+        }
+
         private void SetCommands()
         {
-            CloseButtonClickCommand = new DelegateCommand<Button>(CloseEmailDetailsWindow_Execute);
-            DeleteButtonClickCommand = new DelegateCommand<Button>(DeleteCurrentEmail_Execute);
-            SaveToFileClickCommand = new DelegateCommand<Button>(SaveToFile_Execute);
+            CloseButtonClickCommand = new DelegateCommand<Button>(CloseEmailDetailsWindow_Execute, CloseEmailDetailsWindow_CanExecute);
+            DeleteButtonClickCommand = new DelegateCommand<Button>(DeleteCurrentEmail_Execute, DeleteCurrentEmail_CanExecute);
+            SaveToFileClickCommand = new DelegateCommand<Button>(SaveToFile_Execute, SaveToFile_CanExecute);
         }
 
         private void SaveToFile_Execute(Button button)
         {
             GmailService.SaveEmailToFile(Email);
+        }
+
+        private bool SaveToFile_CanExecute(Button button)
+        {
+            return !_isDeletingEmail;
         }
 
         private async void DeleteCurrentEmail_Execute(Button button)
@@ -58,9 +71,19 @@ namespace SaintSender.DesktopUI.ViewModels
             CloseParentWindow(button);
         }
 
+        private bool DeleteCurrentEmail_CanExecute(Button button)
+        {
+            return !_isDeletingEmail;
+        }
+
         private void CloseEmailDetailsWindow_Execute(Button button)
         {
             CloseParentWindow(button);
+        }
+
+        private bool CloseEmailDetailsWindow_CanExecute(Button button)
+        {
+            return !_isDeletingEmail;
         }
 
         private void CloseParentWindow(Button button)
