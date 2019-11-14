@@ -17,6 +17,7 @@ namespace SaintSender.Core.Services
         private const string ImapHost = "imap.gmail.com";
         private const string SmtpHost = "smtp.gmail.com";
         private static readonly ImapClient ImapClient;
+        private static readonly List<CustoMail> Backup = new List<CustoMail>();
 
         public static string Email => EncryptionService.RetrieveData().Email;
 
@@ -40,7 +41,18 @@ namespace SaintSender.Core.Services
 
         public static async Task<bool> FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
         {
-            return await Task.Factory.StartNew(() => TryToGetEmails(emails));
+            try
+            {
+                return await Task.Factory.StartNew(() => TryToGetEmails(emails));
+            }
+            catch (FreeLimitReachedException)
+            {
+                await Flush(Backup);
+
+                Backup.Clear();
+
+                return false;
+            }
         }
 
         private static bool TryToAuthenticate(string email, string password)
@@ -143,34 +155,24 @@ namespace SaintSender.Core.Services
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
-                var sortedItems = new List<CustoMail>();
-                try
-                {
-                    FillEmailCollection(unseens, emails, false).ForEach(item => sortedItems.Add(item));
-                    FillEmailCollection(seens, emails, true).ForEach(item => sortedItems.Add(item));
-
-                    sortedItems.Sort();
-                    sortedItems.ForEach(item => emails.Add(item));
-                    return true;
-                }
-                catch (FreeLimitReachedException)
-                {
-                    return false;
-                }
+                FillEmailCollection(unseens, false);
+                FillEmailCollection(seens, true);
+                Backup.Sort();
+                Backup.ForEach(emails.Add);
+                Backup.Clear();
+                return true;
             }
         }
 
-        private static List<CustoMail> FillEmailCollection(IEnumerable<string> ids, ICollection<CustoMail> emails, bool readOrNot)
+        private static void FillEmailCollection(IEnumerable<string> ids, bool readOrNot)
         {
-            var result = new List<CustoMail>();
             foreach (var id in ids)
             {
                 var clientMail = ImapClient.GetMessage(int.Parse(id));
                 var custoMail = EmailConverter(clientMail, readOrNot);
                 custoMail.MessageNumber = int.Parse(id);
-                result.Add(custoMail);
+                Backup.Add(custoMail);
             }
-            return result;
         }
 
         private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)
@@ -192,7 +194,7 @@ namespace SaintSender.Core.Services
             return mail;
         }
 
-        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
+        public static async Task Flush(IEnumerable<CustoMail> emails)
         {
             await Task.Factory.StartNew(() => TryToFlush(emails));
         }
