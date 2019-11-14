@@ -140,6 +140,7 @@ namespace SaintSender.Core.Services
                 ImapClient.Authenticate(Email, Password);
                 ImapClient.SelectInbox();
 
+                
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
@@ -192,10 +193,6 @@ namespace SaintSender.Core.Services
             return mail;
         }
 
-        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
-        {
-            await Task.Factory.StartNew(() => TryToFlush(emails));
-        }
 
         private static void TryToFlush(IEnumerable<CustoMail> emails)
         {
@@ -213,6 +210,22 @@ namespace SaintSender.Core.Services
                     }
                 }
             }
+        }
+
+        public static void DeleteEmail(int mailNum)
+        {
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+                ImapClient.DeleteMessage(mailNum, true);
+            }
+        }
+
+        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToFlush(emails));
         }
     }
 }
