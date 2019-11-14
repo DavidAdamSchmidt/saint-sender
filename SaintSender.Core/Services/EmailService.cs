@@ -134,10 +134,10 @@ namespace SaintSender.Core.Services
 
         private static bool TryToGetEmails(ICollection<CustoMail> emails)
         {
-            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
-            {
-                return false;
-            }
+            //if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
+            //{
+            //    return false;
+            //}
 
             using (ImapClient)
             {
