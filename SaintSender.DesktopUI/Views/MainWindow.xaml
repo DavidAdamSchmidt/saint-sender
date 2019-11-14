@@ -18,9 +18,17 @@
         <conv:BooleanToFontWeightConverter x:Key="BoolToFont" />
         <Style TargetType="{x:Type Button}">
             <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Height" Value="20" />
             <Setter Property="Width" Value="75" />
+        </Style>
+        <Style TargetType="{x:Type fa:ImageAwesome}">
+            <Setter Property="Icon" Value="Spinner" />
+            <Setter Property="Spin" Value="True" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="Width" Value="48" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,15,0"></Setter>
         </Style>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -37,18 +45,20 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" />
-            <RowDefinition Height="8*" />
+            <RowDefinition Height="6*" />
         </Grid.RowDefinitions>
         <Button Command="{Binding SendNewButtonClickCommand}" HorizontalAlignment="Left" >
             _Send New
         </Button>
-        <Button Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" Margin="20,0,0,0" Command="{Binding RefreshButtonClickCommand}">
-            _Refresh
-        </Button>
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+            <Button HorizontalAlignment="Left" Margin="20,0,15,0" Command="{Binding RefreshButtonClickCommand}">
+                _Refresh
+            </Button>
+            <fa:ImageAwesome Visibility="{Binding IsLoadingEmails, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </StackPanel>
         <Label Grid.Column="2" Grid.Row="0" Content="{Binding UserEmail}"
-               Width="Auto" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,10,0" />
-        <fa:ImageAwesome Grid.Column="2" Grid.Row="0" Icon="Spinner" Spin="True" Height="48" Width="48" HorizontalAlignment="Right"
-                         Margin="0,0,15,0" Visibility="{Binding IsLoggingOut, Converter={StaticResource BooleanToVisibilityConverter}}" />
+               Width="Auto" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" />
+        <fa:ImageAwesome Grid.Column="2" Grid.Row="0" Visibility="{Binding IsLoggingOut, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <Button Grid.Column="3" Grid.Row="0" x:Name="Logout" HorizontalAlignment="Right"
                 Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}">
             _Log Out
