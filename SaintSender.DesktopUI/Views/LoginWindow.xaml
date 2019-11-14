@@ -17,6 +17,7 @@
     </Window.DataContext>
     <Window.Resources>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <conv:IntegerToBooleanConverter x:Key="IntegerToBooleanConverter" /> 
         <Style TargetType="{x:Type WrapPanel}">
             <Setter Property="Margin" Value="10" />
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -44,7 +45,7 @@
             <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
             <TextBox x:Name="TxtBxEmail" Style="{StaticResource Input}"
                      Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox x:Name="ChooseUser" Height="24" Width="18" IsTabStop="False"
+            <ComboBox IsEnabled="{Binding Users.Count, Converter={StaticResource IntegerToBooleanConverter}}" x:Name="ChooseUser" Height="24" Width="18" IsTabStop="False"
                       ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
