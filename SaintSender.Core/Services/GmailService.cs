@@ -143,11 +143,14 @@ namespace SaintSender.Core.Services
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
+                var sortedItems = new List<CustoMail>();
                 try
                 {
-                    FillEmailCollection(unseens, emails, false);
-                    FillEmailCollection(seens, emails, true);
+                    FillEmailCollection(unseens, emails, false).ForEach(item => sortedItems.Add(item));
+                    FillEmailCollection(seens, emails, true).ForEach(item => sortedItems.Add(item));
 
+                    sortedItems.Sort();
+                    sortedItems.ForEach(item => emails.Add(item));
                     return true;
                 }
                 catch (FreeLimitReachedException)
@@ -157,15 +160,17 @@ namespace SaintSender.Core.Services
             }
         }
 
-        private static void FillEmailCollection(IEnumerable<string> ids, ICollection<CustoMail> emails, bool readOrNot)
+        private static List<CustoMail> FillEmailCollection(IEnumerable<string> ids, ICollection<CustoMail> emails, bool readOrNot)
         {
+            var result = new List<CustoMail>();
             foreach (var id in ids)
             {
                 var clientMail = ImapClient.GetMessage(int.Parse(id));
                 var custoMail = EmailConverter(clientMail, readOrNot);
                 custoMail.MessageNumber = int.Parse(id);
-                emails.Add(custoMail);
+                result.Add(custoMail);
             }
+            return result;
         }
 
         private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)

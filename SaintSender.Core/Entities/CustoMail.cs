@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SaintSender.Core.Entities
 {
-    public class CustoMail : Base
+    public class CustoMail : Base, IComparable
     {
         private bool _isRead;
         public MailAddressCollection Sender { get; set; }
@@ -30,5 +30,23 @@ namespace SaintSender.Core.Entities
         public DateTime Date { get; set; }
 
         public string From => Sender.SingleOrDefault()?.ToString();
+
+        public int CompareTo(Object other)
+        {
+            var compared = (CustoMail)other;
+            if (compared.Date < this.Date)
+            {
+                return -1;
+            }
+            else if (compared.Date == this.Date)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
     }
 }
