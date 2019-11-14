@@ -18,15 +18,9 @@ namespace SaintSender.Core.Services
         private const string SmtpHost = "smtp.gmail.com";
         private static readonly ImapClient ImapClient;
 
-        public static string Email
-        {
-            get => EncryptionService.RetreiveData()[0];
-        }
+        public static string Email => EncryptionService.RetrieveData()[0];
 
-        private static string Password
-        {
-            get => EncryptionService.RetreiveData()[1];
-        }
+        private static string Password => EncryptionService.RetrieveData()[1];
 
         static GmailService()
         {
@@ -194,7 +188,7 @@ namespace SaintSender.Core.Services
             await Task.Factory.StartNew(() => TryToFlush(emails));
         }
 
-        private static void TryToFlush(AsyncObservableCollection<CustoMail> emails)
+        private static void TryToFlush(IEnumerable<CustoMail> emails)
         {
             using (ImapClient)
             {

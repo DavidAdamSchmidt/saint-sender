@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace SaintSender.Core.Services
 {
     public static class EncryptionService
     {
-        private static string FilePath;
+        private static string _filePath;
+        private const string KeyContainerName = "MPPOFKWE12312312";
 
         private static string CreateDirectory()
         {
@@ -29,15 +28,15 @@ namespace SaintSender.Core.Services
             {
                 File.Decrypt(path);
             }
-            catch (Exception e) when(e is ArgumentException || e is IOException)
+            catch (Exception e) when (e is ArgumentException || e is IOException)
             {
                 MessageBox.Show("The directory or file could not be loaded!", "Directory Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch (Exception e) when(e is NotSupportedException)
+            catch (NotSupportedException)
             {
                 MessageBox.Show("Your operation is not supported, please report this error!", "Unknown Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch (Exception e) when(e is UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("You are trying to open files not supported by your Account!", "Unauthorized Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -47,27 +46,27 @@ namespace SaintSender.Core.Services
 
         private static void EncryptFile()
         {
-            File.Encrypt(FilePath);
+            File.Encrypt(_filePath);
         }
 
         private static void CreateFile(string fileName)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(fileName);
+            var bytes = Encoding.ASCII.GetBytes(fileName);
             var dataDirectory = CreateDirectory();
-            FilePath = dataDirectory + $@"\{string.Join("", bytes)}.txt";
-            if (!File.Exists(FilePath))
+            _filePath = dataDirectory + $@"\{string.Join("", bytes)}.txt";
+            if (!File.Exists(_filePath))
             {
-                File.Create(FilePath);
+                File.Create(_filePath).Dispose();
             }
         }
 
-        public static void SaveData(string DataOne, string DataTwo)
+        public static void SaveData(string dataOne, string dataTwo)
         {
-            CreateFile(DataOne);
+            CreateFile(dataOne);
             var formatter = new BinaryFormatter();
-            var saveDataOne = RsaEncrypt(DataOne);
-            var saveDataTwo = RsaEncrypt(DataTwo);
-            using (var stream = new FileStream(FilePath, FileMode.Open, FileAccess.Write))
+            var saveDataOne = RsaEncrypt(dataOne);
+            var saveDataTwo = RsaEncrypt(dataTwo);
+            using (var stream = new FileStream(_filePath, FileMode.Open, FileAccess.Write))
             {
                 formatter.Serialize(stream, saveDataOne);
                 formatter.Serialize(stream, saveDataTwo);
@@ -75,25 +74,25 @@ namespace SaintSender.Core.Services
             EncryptFile();
         }
 
-        public static string[] RetreiveData()
+        public static string[] RetrieveData()
         {
-            var retreiveDataOne = string.Empty;
-            var retreiveDataTwo = string.Empty;
+            var retrieveDataOne = string.Empty;
+            var retrieveDataTwo = string.Empty;
 
             var formatter = new BinaryFormatter();
-            using (var fileStream = new FileStream(DecryptFile(FilePath), FileMode.Open, FileAccess.Read))
+            using (var fileStream = new FileStream(DecryptFile(_filePath), FileMode.Open, FileAccess.Read))
             {
-                if (!(fileStream.Length == 0))
+                if (fileStream.Length != 0)
                 {
-                    retreiveDataOne = RsaDecrypt((string)formatter.Deserialize(fileStream));
-                    retreiveDataTwo = RsaDecrypt((string)formatter.Deserialize(fileStream));
+                    retrieveDataOne = RsaDecrypt((string)formatter.Deserialize(fileStream));
+                    retrieveDataTwo = RsaDecrypt((string)formatter.Deserialize(fileStream));
                 }
                 EncryptFile();
             }
-            return new string[] { retreiveDataOne, retreiveDataTwo};
+            return new[] { retrieveDataOne, retrieveDataTwo };
         }
 
-        public static Dictionary<string, string> RetreiveAllData()
+        public static Dictionary<string, string> RetrieveAllData()
         {
             var userData = new Dictionary<string, string>();
             var directory = CreateDirectory();
@@ -101,8 +100,8 @@ namespace SaintSender.Core.Services
 
             foreach (var file in filePaths)
             {
-                FilePath = file;
-                var userInfo = RetreiveData();
+                _filePath = file;
+                var userInfo = RetrieveData();
                 if (!string.IsNullOrEmpty(userInfo[0]))
                 {
                     userData.Add(userInfo[0], userInfo[1]);
@@ -118,7 +117,7 @@ namespace SaintSender.Core.Services
 
             var cspParams = new CspParameters
             {
-                KeyContainerName = "MPPOFKWE12312312"
+                KeyContainerName = KeyContainerName
             };
             using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
             {
@@ -129,21 +128,22 @@ namespace SaintSender.Core.Services
 
         private static string RsaDecrypt(string value)
         {
-            if (!string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value))
             {
-                var encryptedData = Convert.FromBase64String(value);
-
-                var cspParams = new CspParameters
-                {
-                    KeyContainerName = "MPPOFKWE12312312"
-                };
-                using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
-                {
-                    var decryptedData = rsa.Decrypt(encryptedData, false);
-                    return Encoding.Unicode.GetString(decryptedData);
-                }
+                return string.Empty;
             }
-            return string.Empty;
+
+            var encryptedData = Convert.FromBase64String(value);
+
+            var cspParams = new CspParameters
+            {
+                KeyContainerName = KeyContainerName
+            };
+            using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
+            {
+                var decryptedData = rsa.Decrypt(encryptedData, false);
+                return Encoding.Unicode.GetString(decryptedData);
+            }
         }
     }
 }
