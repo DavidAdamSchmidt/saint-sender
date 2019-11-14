@@ -38,6 +38,7 @@
       <HintPath>..\packages\Mail.dll.3.0.19162.1801\lib\net45\Mail.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,8 +53,9 @@
     <Compile Include="Entities\Base.cs" />
     <Compile Include="Entities\CustoMail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
+    <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\Utils.cs" />
-    <Compile Include="Services\EmailService.cs" />
+    <Compile Include="Services\GmailService.cs" />
     <Compile Include="Services\GreetService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Interfaces\IGreetService.cs" />
