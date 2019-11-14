@@ -6,11 +6,13 @@
         xmlns:local="clr-namespace:SaintSender.DesktopUI"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="SaintSender"
         Height="320" Width="320" MinHeight="280" MinWidth="200" MaxHeight="400" MaxWidth="600"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <vm:LoginWindowModel x:Key="Model" />
         <Style TargetType="{x:Type WrapPanel}">
             <Setter Property="Margin" Value="10" />
@@ -54,5 +56,9 @@
                 Cancel
             </Button>
         </WrapPanel>
+        <TextBlock Height="48" Width="48">
+            <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48"
+                             Visibility="{Binding IsSending, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </TextBlock>
     </StackPanel>
 </Window>

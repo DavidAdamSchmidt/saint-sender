@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 using GemBox.Email;
 using GemBox.Email.Imap;
 using MailAddress = System.Net.Mail.MailAddress;
@@ -16,9 +17,8 @@ namespace SaintSender.Core.Services
     {
         private const string ImapHost = "imap.gmail.com";
         private const string SmtpHost = "smtp.gmail.com";
-        private static string Pass = string.Empty;
         private static readonly ImapClient ImapClient;
-        public static string Email { get; set; }
+        private static string _pass = string.Empty;
 
         static EmailService()
         {
@@ -26,7 +26,24 @@ namespace SaintSender.Core.Services
             ImapClient = new ImapClient(ImapHost);
         }
 
-        public static bool Authenticate(string email, string password)
+        public static string Email { get; set; }
+
+        public static async Task<bool> Authenticate(string email, string password)
+        {
+            return await Task.Factory.StartNew(() => TryToAuthenticate(email, password));
+        }
+
+        public static async Task<bool> SendMail(string recipient, string subject, string body)
+        {
+            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
+        }
+
+        public static async Task<bool> FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
+        {
+            return await Task.Factory.StartNew(() => TryToGetEmails(emails));
+        }
+
+        private static bool TryToAuthenticate(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -47,20 +64,21 @@ namespace SaintSender.Core.Services
                 {
                     return false;
                 }
-
-                if (ImapClient.IsAuthenticated)
+                catch (ArgumentException)
                 {
-                    Email = email;
-                    Pass = password;
+                    return false;
                 }
+
+                if (!ImapClient.IsAuthenticated)
+                {
+                    return ImapClient.IsAuthenticated;
+                }
+
+                Email = email;
+                _pass = password;
 
                 return ImapClient.IsAuthenticated;
             }
-        }
-
-        public static async Task<bool> SendMail(string recipient, string subject, string body)
-        {
-            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
         }
 
         private static bool TryToSendMail(string recipient, string subject, string body)
@@ -82,7 +100,7 @@ namespace SaintSender.Core.Services
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(from.Address, Pass)
+                    Credentials = new NetworkCredential(from.Address, _pass)
                 };
 
                 message = new MailMessage(from, to)
@@ -114,69 +132,84 @@ namespace SaintSender.Core.Services
                    ex is FormatException;
         }
 
-        public static ObservableCollection<CustoMail> GetEmails()
+        private static bool TryToGetEmails(ICollection<CustoMail> emails)
         {
-            var emails = new ObservableCollection<CustoMail>();
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
+            {
+                return false;
+            }
+
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, Pass);
+                ImapClient.Authenticate(Email, _pass);
                 ImapClient.SelectInbox();
 
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
-                foreach (var mailNum in unseens)
+                try
                 {
-                    var clientMail = ImapClient.GetMessage(int.Parse(mailNum));
-                    var custoMail = EmailConverter(clientMail, false);
-                    custoMail.MessageNumber = int.Parse(mailNum);
-                    emails.Add(custoMail);
-                }
+                    FillEmailCollection(unseens, emails, false);
+                    FillEmailCollection(seens, emails, true);
 
-                foreach (var mailNum in seens)
+                    return true;
+                }
+                catch (FreeLimitReachedException)
                 {
-                    var clientMail = ImapClient.GetMessage(int.Parse(mailNum));
-                    var custoMail = EmailConverter(clientMail, true);
-                    custoMail.MessageNumber = int.Parse(mailNum);
-                    emails.Add(custoMail);
+                    return false;
                 }
-
             }
-            return emails;
+        }
+
+        private static void FillEmailCollection(IEnumerable<string> ids, ICollection<CustoMail> emails, bool readOrNot)
+        {
+            foreach (var id in ids)
+            {
+                var clientMail = ImapClient.GetMessage(int.Parse(id));
+                var custoMail = EmailConverter(clientMail, readOrNot);
+                custoMail.MessageNumber = int.Parse(id);
+                emails.Add(custoMail);
+            }
         }
 
         private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)
         {
-            var mail = new CustoMail();
+            var mail = new CustoMail
+            {
+                Attachments = clientMail.Attachments,
+                Bcc = clientMail.Bcc,
+                Cc = clientMail.Cc,
+                BodyHtml = clientMail.BodyHtml,
+                TextBody = clientMail.BodyText,
+                Sender = clientMail.From,
+                Subject = clientMail.Subject,
+                To = clientMail.To,
+                Date = clientMail.Date,
+                IsRead = readOrNot
+            };
 
-            mail.Attachments = clientMail.Attachments;
-            mail.Bcc = clientMail.Bcc;
-            mail.Cc = clientMail.Cc;
-            mail.BodyHtml = clientMail.BodyHtml;
-            mail.TextBody = clientMail.BodyText;
-            mail.Sender = clientMail.From;
-            mail.Subject = clientMail.Subject;
-            mail.To = clientMail.To;
-            mail.Date = clientMail.Date;
-
-            mail.IsRead = readOrNot;
             return mail;
         }
 
-        public static void Flush(ObservableCollection<CustoMail> Emails)
+        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToFlush(emails));
+        }
+
+        private static void TryToFlush(AsyncObservableCollection<CustoMail> emails)
         {
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, Pass);
+                ImapClient.Authenticate(Email, _pass);
                 ImapClient.SelectInbox();
 
-                foreach (var mail in Emails)
+                foreach (var mail in emails)
                 {
                     if (!mail.IsRead)
                     {
-                    ImapClient.SetMessageFlags(mail.MessageNumber, new string[] { "Unseen" });
+                        ImapClient.SetMessageFlags(mail.MessageNumber, "Unseen");
                     }
                 }
             }

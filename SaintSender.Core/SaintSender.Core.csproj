@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\AsyncObservableCollection.cs" />
     <Compile Include="Entities\Base.cs" />
     <Compile Include="Entities\CustoMail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
