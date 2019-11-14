@@ -19,6 +19,7 @@ namespace SaintSender.Core.Entities
             _canExecute = canExecute;
         }
 
+        public event EventHandler CanExecuteChanged;
 
         public bool CanExecute(object parameter)
         {
@@ -30,7 +31,6 @@ namespace SaintSender.Core.Entities
             _execute((T)parameter);
         }
 
-        public event EventHandler CanExecuteChanged;
         public void RaiseCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);

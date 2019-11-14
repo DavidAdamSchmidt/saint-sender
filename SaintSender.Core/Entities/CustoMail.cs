@@ -7,6 +7,7 @@ namespace SaintSender.Core.Entities
     public class CustoMail : Base, IComparable
     {
         private bool _isRead;
+
         public MailAddressCollection Sender { get; set; }
 
         public MailAddressCollection To { get; set; }
@@ -21,7 +22,11 @@ namespace SaintSender.Core.Entities
 
         public string BodyHtml { get; set; }
 
-        public bool IsRead { get => _isRead; set => SetProperty(ref _isRead, value); }
+        public bool IsRead
+        {
+            get => _isRead;
+            set => SetProperty(ref _isRead, value);
+        }
 
         public AttachmentCollection Attachments { get; set; }
 
@@ -31,21 +36,15 @@ namespace SaintSender.Core.Entities
 
         public string From => Sender.SingleOrDefault()?.ToString();
 
-        public int CompareTo(Object other)
+        public int CompareTo(object other)
         {
             var compared = (CustoMail)other;
             if (compared.Date < this.Date)
             {
                 return -1;
             }
-            else if (compared.Date == this.Date)
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
-            }
+
+            return compared.Date == Date ? 1 : 0;
         }
 
     }

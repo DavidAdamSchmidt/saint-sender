@@ -10,7 +10,6 @@ using MailMessage = System.Net.Mail.MailMessage;
 using GemBoxMail = GemBox.Email.MailMessage;
 using SaintSender.Core.Entities;
 using System.IO;
-using System.Windows;
 
 namespace SaintSender.Core.Services
 {
@@ -45,7 +44,7 @@ namespace SaintSender.Core.Services
         {
             try
             {
-                return await Task.Factory.StartNew(() => TryToGetEmails(emails));
+                return await Task.Factory.StartNew(() => TryToFillEmailCollection(emails));
             }
             catch (FreeLimitReachedException)
             {
@@ -57,6 +56,21 @@ namespace SaintSender.Core.Services
             }
         }
 
+        public static async Task<bool> SaveEmailToFile(CustoMail mail)
+        {
+            return await Task.Factory.StartNew(() => TryToSaveEmailToFile(mail));
+        }
+
+        public static async Task DeleteEmail(CustoMail mail)
+        {
+            await Task.Factory.StartNew(() => TryToDeleteEmail(mail));
+        }
+
+        public static async Task Flush(IEnumerable<CustoMail> emails)
+        {
+            await Task.Factory.StartNew(() => TryToFlush(emails));
+        }
+
         private static bool TryToAuthenticate(string email, string password)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -64,9 +78,11 @@ namespace SaintSender.Core.Services
                 return false;
             }
 
-            if (!email.EndsWith("@gmail.com"))
+            const string domain = "@gmail.com";
+
+            if (!email.EndsWith(domain))
             {
-                email += "@gmail.com";
+                email += domain;
             }
 
             using (ImapClient)
@@ -133,15 +149,7 @@ namespace SaintSender.Core.Services
             }
         }
 
-        private static bool IsHandledForSendingFailure(Exception ex)
-        {
-            return ex is InvalidOperationException ||
-                   ex is SmtpException ||
-                   ex is ArgumentException ||
-                   ex is FormatException;
-        }
-
-        private static bool TryToGetEmails(ICollection<CustoMail> emails)
+        private static bool TryToFillEmailCollection(ICollection<CustoMail> emails)
         {
             if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
             {
@@ -158,8 +166,8 @@ namespace SaintSender.Core.Services
                 var unseens = ImapClient.SearchMessageUids("Unseen");
                 var seens = ImapClient.SearchMessageUids("Seen");
 
-                FillEmailCollection(unseens, false);
-                FillEmailCollection(seens, true);
+                FillEmailCollectionByIds(unseens, false);
+                FillEmailCollectionByIds(seens, true);
                 Backup.Sort();
                 Backup.ForEach(emails.Add);
                 Backup.Clear();
@@ -167,7 +175,72 @@ namespace SaintSender.Core.Services
             }
         }
 
-        private static void FillEmailCollection(IEnumerable<string> ids, bool readOrNot)
+        private static bool TryToSaveEmailToFile(CustoMail mail)
+        {
+            var currentDirectory = Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}\SavedEmails");
+            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            var filePath = $@"{currentDirectory.FullName}\{fileName}.txt";
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Dispose();
+            }
+
+            var overwritten = !string.IsNullOrEmpty(File.ReadAllText(filePath));
+
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+                ImapClient.SaveMessage(mail.MessageNumber, filePath);
+            }
+
+            return overwritten;
+        }
+
+        private static void TryToFlush(IEnumerable<CustoMail> emails)
+        {
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+
+                foreach (var mail in emails)
+                {
+                    if (!mail.IsRead)
+                    {
+                        ImapClient.SetMessageFlags(mail.MessageNumber, "Unseen");
+                    }
+                }
+            }
+        }
+
+        private static void TryToDeleteEmail(CustoMail mail)
+        {
+            var currentDirectory = $@"{Directory.GetCurrentDirectory()}\SavedEmails";
+            var files = Directory.GetFiles(currentDirectory);
+            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            foreach (var file in files)
+            {
+                if (!file.EndsWith($@"\{fileName}.txt"))
+                {
+                    continue;
+                }
+
+                File.Delete(file);
+                break;
+            }
+            using (ImapClient)
+            {
+                ImapClient.Connect();
+                ImapClient.Authenticate(Email, Password);
+                ImapClient.SelectInbox();
+                ImapClient.DeleteMessage(mail.MessageNumber, true);
+            }
+        }
+
+        private static void FillEmailCollectionByIds(IEnumerable<string> ids, bool readOrNot)
         {
             foreach (var id in ids)
             {
@@ -197,87 +270,12 @@ namespace SaintSender.Core.Services
             return mail;
         }
 
-        public static async Task Flush(IEnumerable<CustoMail> emails)
+        private static bool IsHandledForSendingFailure(Exception ex)
         {
-            await Task.Factory.StartNew(() => TryToFlush(emails));
-        }
-
-        private static void TryToFlush(IEnumerable<CustoMail> emails)
-        {
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-
-                foreach (var mail in emails)
-                {
-                    if (!mail.IsRead)
-                    {
-                        ImapClient.SetMessageFlags(mail.MessageNumber, "Unseen");
-                    }
-                }
-            }
-        }
-
-        public static async Task DeleteEmail(CustoMail mail)
-        {
-            await Task.Factory.StartNew(() => TryToDeleteEmail(mail));
-        }
-
-        private static void TryToDeleteEmail(CustoMail mail)
-        {
-            var currentDirectory = Directory.GetCurrentDirectory() + @"\SavedEmails";
-            var files = Directory.GetFiles(currentDirectory);
-            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
-            foreach (var file in files)
-            {
-                if (file.EndsWith($@"\{fileName}.txt"))
-                {
-                    File.Delete(file);
-                    break;
-                }
-            }
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-                ImapClient.DeleteMessage(mail.MessageNumber, true);
-            }
-        }
-
-        public static async Task<bool> SaveEmailToFile(CustoMail mail)
-        {
-            return await Task.Factory.StartNew(() => TryToSaveEmailToFile(mail));
-        }
-
-        private static bool TryToSaveEmailToFile(CustoMail mail)
-        {
-            var currentDirectory = Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"\SavedEmails");
-            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
-            var filePath = currentDirectory.FullName + $@"\{fileName}.txt";
-            if (!File.Exists(filePath))
-            {
-                File.Create(filePath).Dispose();
-            }
-
-            var overwritten = !string.IsNullOrEmpty(File.ReadAllText(filePath));
-
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-                ImapClient.SaveMessage(mail.MessageNumber, filePath);
-            }
-
-            return overwritten;
-        }
-
-        public static async Task Flush(AsyncObservableCollection<CustoMail> emails)
-        {
-            await Task.Factory.StartNew(() => TryToFlush(emails));
+            return ex is InvalidOperationException ||
+                   ex is SmtpException ||
+                   ex is ArgumentException ||
+                   ex is FormatException;
         }
     }
 }

@@ -54,7 +54,7 @@ namespace SaintSender.Core.Services
         {
             var bytes = Encoding.ASCII.GetBytes(fileName);
             var dataDirectory = CreateDirectory();
-            _filePath = dataDirectory + $@"\{string.Join("", bytes)}.txt";
+            _filePath = $@"{dataDirectory}\{string.Join("", bytes)}.txt";
             if (!File.Exists(_filePath))
             {
                 File.Create(_filePath).Dispose();

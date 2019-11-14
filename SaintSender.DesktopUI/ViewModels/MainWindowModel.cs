@@ -40,7 +40,6 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             get => _loggingOut;
             set => SetProperty(ref _loggingOut, value);
-
         }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
