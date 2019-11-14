@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
@@ -12,9 +11,11 @@ namespace SaintSender.DesktopUI.ViewModels
     {
         private string _email;
         private bool _sending;
+        private readonly Dictionary<string, string> _userData;
 
         public LoginWindowModel()
         {
+            _userData = EncryptionService.RetrieveAllData();
             SetCommands();
         }
 
@@ -39,12 +40,7 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
-        private Dictionary<string, string> _userData = EncryptionService.RetreiveAllData();
-
-        public Dictionary<string, string>.KeyCollection Users
-        {
-            get => _userData.Keys;
-        }
+        public Dictionary<string, string>.KeyCollection Users => _userData.Keys;
 
         public string SelectedUser { get; set; }
 
@@ -56,17 +52,15 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<PasswordBox> FillLoginDetails { get; private set; }
 
-
-
         private void SetCommands()
         {
             CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
             SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute, AuthenticateLogin_CanExecute);
             PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
-            FillLoginDetails = new DelegateCommand<PasswordBox>(AutofillLoginDetails_Execute);
+            FillLoginDetails = new DelegateCommand<PasswordBox>(AutoFillLoginDetails_Execute);
         }
 
-        private void AutofillLoginDetails_Execute(PasswordBox passwordBox)
+        private void AutoFillLoginDetails_Execute(PasswordBox passwordBox)
         {
             Email = SelectedUser;
             passwordBox.Password = _userData[SelectedUser];
