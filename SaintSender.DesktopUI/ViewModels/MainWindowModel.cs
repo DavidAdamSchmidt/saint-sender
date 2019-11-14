@@ -69,11 +69,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
             IsLoadingEmails = false;
 
-            if (_maxRefreshCapacityReached)
-            {
-                MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
-                    "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
+            //if (_maxRefreshCapacityReached && 1 == 2)
+            //{
+            //    MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
+            //        "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            //}
         }
 
         private void SetCommands()
