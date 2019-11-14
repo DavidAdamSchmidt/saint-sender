@@ -17,7 +17,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             SetCommands();
 
-            UserEmail = EmailService.Email;
+            UserEmail = GmailService.Email;
             SetEmails();
         }
 
@@ -65,7 +65,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsLoadingEmails = true;
 
-            _maxRefreshCapacityReached = !await EmailService.FillEmailCollection(Emails);
+            _maxRefreshCapacityReached = !await GmailService.FillEmailCollection(Emails);
 
             IsLoadingEmails = false;
 
@@ -89,7 +89,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             UserEmail = string.Empty;
             IsLoggingOut = true;
-            await EmailService.Flush(Emails);
+            await GmailService.Flush(Emails);
         }
 
         private void SendNew_Execute(string throwAway)
@@ -106,7 +106,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             UserEmail = string.Empty;
             IsLoggingOut = true;
-            await EmailService.Flush(Emails);
+            await GmailService.Flush(Emails);
 
             var loginWindow = new LoginWindow();
 

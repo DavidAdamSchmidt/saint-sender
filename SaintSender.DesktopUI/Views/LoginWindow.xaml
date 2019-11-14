@@ -10,7 +10,7 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
         Title="SaintSender"
-        Height="320" Width="320" MinHeight="280" MinWidth="200" MaxHeight="400" MaxWidth="600"
+        Height="320" Width="320" MinHeight="300" MinWidth="200" MaxHeight="400" MaxWidth="600"
         WindowStartupLocation="CenterScreen">
     <Window.DataContext>
         <vm:LoginWindowModel />
@@ -43,11 +43,18 @@
         <WrapPanel>
             <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
             <TextBox x:Name="TxtBxEmail" Style="{StaticResource Input}"
-                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox x:Name="ChooseUser"  ItemsSource="{Binding Users}" Height="24" Width="18" SelectedItem="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding FillLoginDetails}" CommandParameter="{Binding ElementName=PwBxPassword}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
         </WrapPanel>
         <WrapPanel>
             <Label Target="{Binding ElementName=PwBxPassword}">_Password:</Label>
-            <PasswordBox x:Name="PwBxPassword" Style="{StaticResource Input}">
+            <PasswordBox x:Name="PwBxPassword" Style="{StaticResource Input}" Width="158">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="PasswordChanged">
                         <i:InvokeCommandAction Command="{Binding PasswordChangedCommand}" />
