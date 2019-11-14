@@ -1,27 +1,49 @@
-﻿using SaintSender.Core.Entities;
+﻿using System.Windows;
+using System.Windows.Controls;
+using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
-using System.Windows;
-using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
     public class MainWindowModel : ViewModelBase
     {
         private string _email;
+        private bool _loadingEmails;
         private bool _loggingOut;
 
         public MainWindowModel()
         {
-            GetMails();
             SetCommands();
+            GetMails();
         }
 
         public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
 
-        public string UserEmail { get => _email; set => SetProperty(ref _email, value); }
+        public string UserEmail
+        {
+            get => _email;
+            set => SetProperty(ref _email, value);
+        }
 
-        public bool IsLoggingOut { get => _loggingOut; set => SetProperty(ref _loggingOut, value); }
+        public bool IsLoadingEmails
+        {
+            get => _loadingEmails;
+            set
+            {
+                SetProperty(ref _loadingEmails, value);
+                SendNewButtonClickCommand.RaiseCanExecuteChanged();
+                PreviousPageButtonCommand.RaiseCanExecuteChanged();
+                NextPageButtonCommand.RaiseCanExecuteChanged();
+                LogoutButtonClickCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        public bool IsLoggingOut
+        {
+            get => _loggingOut;
+            set => SetProperty(ref _loggingOut, value);
+        }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -38,16 +60,22 @@ namespace SaintSender.DesktopUI.ViewModels
         private async void GetMails()
         {
             UserEmail = EmailService.Email;
+
+            IsLoadingEmails = true;
+
             await EmailService.FillEmailCollection(Emails);
+
+            IsLoadingEmails = false;
         }
 
         private void SetCommands()
         {
-            LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute);
+            LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
-            SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute);
-            NextPageButtonCommand = new DelegateCommand<string>(NextPageShow_Execute);
-            PreviousPageButtonCommand = new DelegateCommand<string>(PreviousPageShow_Execute);
+            SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
+            NextPageButtonCommand = new DelegateCommand<string>(NextPageShow_Execute, NextPageShow_CanExecute);
+            PreviousPageButtonCommand =
+                new DelegateCommand<string>(PreviousPageShow_Execute, PreviousPageShow_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
         }
 
@@ -60,15 +88,31 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void PreviousPageShow_Execute(string throwAway)
         {
+            MessageBox.Show("");
+        }
+
+        private bool PreviousPageShow_CanExecute(string throwAway)
+        {
+            return !_loadingEmails;
         }
 
         private void NextPageShow_Execute(string throwAway)
         {
         }
 
+        private bool NextPageShow_CanExecute(string throwAway)
+        {
+            return !_loadingEmails;
+        }
+
         private void SendNew_Execute(string throwAway)
         {
             new ComposeWindow().ShowDialog();
+        }
+
+        private bool SendNew_CanExecute(string throwAway)
+        {
+            return !_loadingEmails;
         }
 
         private async void Logout_Execute(Button button)
@@ -83,17 +127,21 @@ namespace SaintSender.DesktopUI.ViewModels
             parentWindow?.Close();
 
             loginWindow.Show();
+        }
 
+        private bool Logout_CanExecute(Button button)
+        {
+            return !_loadingEmails;
         }
 
         private void ReadEmail_Execute(CustoMail email)
         {
-             email.IsRead = true;
-             var emailDetailsDialog = new EmailDetailsWindow
-             {
-                 DataContext = new EmailDetailsWindowModel(email)
-             };
-             emailDetailsDialog.ShowDialog();
+            email.IsRead = true;
+            var emailDetailsDialog = new EmailDetailsWindow
+            {
+                DataContext = new EmailDetailsWindowModel(email)
+            };
+            emailDetailsDialog.ShowDialog();
         }
     }
 }

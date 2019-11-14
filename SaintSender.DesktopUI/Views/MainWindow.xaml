@@ -9,23 +9,23 @@
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="MainWindow" ResizeMode="NoResize" >
+        Title="MainWindow" ResizeMode="NoResize">
     <Window.DataContext>
         <vm:MainWindowModel />
     </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <conv:BooleanToFontWeightConverter x:Key="BoolToFont"/>
+        <conv:BooleanToFontWeightConverter x:Key="BoolToFont" />
         <Style TargetType="local:MainWindow">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Height" Value="600"/>
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Height" Value="600" />
             <Setter Property="Width" Value="800" />
         </Style>
         <Style TargetType="{x:Type Button}">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Height" Value="20"/>
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Height" Value="20" />
             <Setter Property="Width" Value="75" />
         </Style>
     </Window.Resources>
@@ -35,8 +35,10 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
-        <Label Content="{Binding UserEmail}" Margin="0,49,128,0" VerticalAlignment="Top" HorizontalAlignment="Right" Height="40" VerticalContentAlignment="Stretch" Width="Auto" FontWeight="Bold"/>
-        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
+        <Label Content="{Binding UserEmail}" Margin="0,49,128,0" VerticalAlignment="Top" HorizontalAlignment="Right"
+               Height="40" VerticalContentAlignment="Stretch" Width="Auto" FontWeight="Bold" />
+        <Button x:Name="Logout" Command="{Binding LogoutButtonClickCommand}"
+                CommandParameter="{Binding ElementName=Logout}" Margin="657,40,35,474">
             _Log Out
         </Button>
         <Button Command="{Binding SendNewButtonClickCommand}" Margin="36,37,651,477">
@@ -45,23 +47,27 @@
         <ListBox x:Name="Mails" ItemsSource="{Binding Emails}" Height="362" Margin="39,120,35,52" Width="699">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
-                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}" CommandParameter="{Binding ElementName=Mails, Path=SelectedItem}"/>
+                    <i:InvokeCommandAction Command="{Binding ReadDoubleClickedEmail}"
+                                           CommandParameter="{Binding ElementName=Mails, Path=SelectedItem}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel x:Name="Item">
-                        <TextBlock Text="{Binding Path=Subject}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
-                        <TextBlock Text="{Binding Path=From}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
-                        <TextBlock Text="{Binding Path=Date}" FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}"/>
+                        <TextBlock Text="{Binding Path=Subject}"
+                                   FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />
+                        <TextBlock Text="{Binding Path=From}"
+                                   FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />
+                        <TextBlock Text="{Binding Path=Date}"
+                                   FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button x:Name="Previous" Margin="256,519,464,32" Width="74">
+        <Button x:Name="Previous" Margin="256,519,464,32" Width="74" Command="{Binding PreviousPageButtonCommand}">
             _Previous
         </Button>
-        <Button x:Name="Next" Margin="474,519,246,32" Width="74">
+        <Button x:Name="Next" Margin="474,519,246,32" Width="74" Command="{Binding NextPageButtonCommand}">
             _Next
         </Button>
         <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48" Margin="599,41,147,482"
