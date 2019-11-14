@@ -20,7 +20,7 @@
         <Style TargetType="{x:Type Button}">
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Height" Value="20" />
+            <Setter Property="Height" Value="22" />
             <Setter Property="Width" Value="75" />
         </Style>
         <Style TargetType="{x:Type fa:ImageAwesome}">
@@ -62,7 +62,7 @@
         <fa:ImageAwesome Grid.Column="2" Grid.Row="0" Visibility="{Binding IsLoggingOut, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <Button Grid.Column="3" Grid.Row="0" x:Name="Logout" HorizontalAlignment="Right"
                 Command="{Binding LogoutButtonClickCommand}" CommandParameter="{Binding ElementName=Logout}">
-            _Log Out
+            _Logout
         </Button>
         <ListBox x:Name="Mails" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1"
                  ItemsSource="{Binding Emails}" >

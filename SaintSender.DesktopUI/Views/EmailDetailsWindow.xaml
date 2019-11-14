@@ -37,9 +37,9 @@
                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                  Margin="10,0,10,5" Padding="5" />
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Name="BtnClose"
-                Width="75" Height="20" VerticalAlignment="Bottom"
+                Width="75" Height="22" VerticalAlignment="Bottom"
                 Command="{Binding CloseButtonClickCommand}" CommandParameter="{Binding ElementName=BtnClose}" >
-            Close
+            _Close
         </Button>
     </Grid>
 </Window>

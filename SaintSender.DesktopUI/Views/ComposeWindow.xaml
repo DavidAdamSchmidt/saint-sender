@@ -12,20 +12,19 @@
     <Window.Resources>
         <vm:ComposeWindowModel x:Key="Model" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <system:Double x:Key="ControlHeight">24</system:Double>
         <Style TargetType="Label">
             <Setter Property="Height" Value="25" />
         </Style>
         <Style x:Key="Field" TargetType="{x:Type TextBox}">
-            <Setter Property="Height" Value="{StaticResource ControlHeight}" />
+            <Setter Property="Height" Value="24" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
         <Style TargetType="{x:Type Button}">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="Margin" Value="0,0,15,0" />
-            <Setter Property="Height" Value="{StaticResource ControlHeight}" />
-            <Setter Property="Width" Value="70" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Width" Value="75" />
         </Style>
     </Window.Resources>
     <Grid DataContext="{StaticResource Model}" Margin="40">
@@ -53,7 +52,7 @@
                 Send
             </Button>
             <Button Command="{Binding CancelButtonClickCommand}">
-                Cancel
+                _Cancel
             </Button>
             <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48"
                              Visibility="{Binding IsSending, Converter={StaticResource BooleanToVisibilityConverter}}" />
