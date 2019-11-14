@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class ComposeWindowModel : ViewModelBase
+    public class ComposeWindowModel : Base
     {
         private string _recipient;
         private string _subject;

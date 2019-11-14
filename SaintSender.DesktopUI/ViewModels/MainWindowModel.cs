@@ -6,7 +6,7 @@ using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class MainWindowModel : ViewModelBase
+    class MainWindowModel : Base
     {
         private string _email;
         private bool _loadingEmails;
@@ -70,6 +70,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
             IsLoadingEmails = false;
         }
+        public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
 
         private void SetCommands()
         {
@@ -80,6 +81,13 @@ namespace SaintSender.DesktopUI.ViewModels
             PreviousPageButtonCommand =
                 new DelegateCommand<string>(PreviousPageShow_Execute, PreviousPageShow_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute);
+            RefreshButtonClickCommand = new DelegateCommand<string>(RefreshCurrent_Execute);
+        }
+
+        private async void RefreshCurrent_Execute(string obj)
+        {
+            await EmailService.Flush(Emails);
+            await EmailService.FillEmailCollection(Emails);
         }
 
         private async void Exit_Execute(string throwAway)

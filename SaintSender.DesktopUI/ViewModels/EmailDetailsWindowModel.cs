@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class EmailDetailsWindowModel : ViewModelBase
+    public class EmailDetailsWindowModel : Base
     {
         public DelegateCommand<Button> CloseButtonClickCommand { get; private set; }
 

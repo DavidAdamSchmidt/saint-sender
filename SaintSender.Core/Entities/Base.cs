@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace SaintSender.DesktopUI.ViewModels
+namespace SaintSender.Core.Entities
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class Base : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -100,7 +100,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModels\LoginWindowModel.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
