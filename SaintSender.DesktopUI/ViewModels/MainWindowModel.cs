@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
 using SaintSender.Core.Services;
@@ -65,15 +66,22 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsLoadingEmails = true;
 
-            _maxRefreshCapacityReached = !await GmailService.FillEmailCollection(Emails);
+            await FillEmailCollection();
 
             IsLoadingEmails = false;
+        }
 
-            //if (_maxRefreshCapacityReached && 1 == 2)
-            //{
-            //    MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
-            //        "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            //}
+        private async Task FillEmailCollection()
+        {
+            _maxRefreshCapacityReached = !await GmailService.FillEmailCollection(Emails);
+
+            if (_maxRefreshCapacityReached)
+            {
+                IsLoadingEmails = false;
+
+                MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
+                    "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
         }
 
         private void SetCommands()
@@ -136,10 +144,15 @@ namespace SaintSender.DesktopUI.ViewModels
             return SetCommandAvailability();
         }
 
-        private void RefreshEmails_Execute(string throwAway)
+        private async void RefreshEmails_Execute(string throwAway)
         {
+            IsLoadingEmails = true;
+
+            await GmailService.Flush(Emails);
             Emails.Clear();
-            SetEmails();
+            await FillEmailCollection();
+
+            IsLoadingEmails = false;
         }
 
         private bool RefreshEmails_CanExecute(string throwAway)
