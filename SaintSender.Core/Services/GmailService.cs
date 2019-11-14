@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -13,20 +12,27 @@ using SaintSender.Core.Entities;
 
 namespace SaintSender.Core.Services
 {
-    public static class EmailService
+    public static class GmailService
     {
         private const string ImapHost = "imap.gmail.com";
         private const string SmtpHost = "smtp.gmail.com";
         private static readonly ImapClient ImapClient;
-        private static string _pass = string.Empty;
 
-        static EmailService()
+        public static string Email
+        {
+            get => EncryptionService.RetreiveData()[0];
+        }
+
+        private static string Password
+        {
+            get => EncryptionService.RetreiveData()[1];
+        }
+
+        static GmailService()
         {
             ComponentInfo.SetLicense("FREE-LIMITED-KEY");
             ImapClient = new ImapClient(ImapHost);
         }
-
-        public static string Email { get; set; }
 
         public static async Task<bool> Authenticate(string email, string password)
         {
@@ -50,7 +56,6 @@ namespace SaintSender.Core.Services
                 return false;
             }
 
-            //TODO save credentials
 
             using (ImapClient)
             {
@@ -60,22 +65,15 @@ namespace SaintSender.Core.Services
                 {
                     ImapClient.Authenticate(email, password);
                 }
-                catch (InvalidOperationException)
-                {
-                    return false;
-                }
-                catch (ArgumentException)
+                catch (Exception e) when(e is InvalidOperationException || e is ArgumentException)
                 {
                     return false;
                 }
 
-                if (!ImapClient.IsAuthenticated)
+                if (ImapClient.IsAuthenticated)
                 {
-                    return ImapClient.IsAuthenticated;
+                    EncryptionService.SaveData(email, password);
                 }
-
-                Email = email;
-                _pass = password;
 
                 return ImapClient.IsAuthenticated;
             }
@@ -83,7 +81,6 @@ namespace SaintSender.Core.Services
 
         private static bool TryToSendMail(string recipient, string subject, string body)
         {
-            // TODO: provide sender credentials
 
             SmtpClient smtp = null;
             MailMessage message = null;
@@ -100,7 +97,7 @@ namespace SaintSender.Core.Services
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(from.Address, _pass)
+                    Credentials = new NetworkCredential(from.Address, Password)
                 };
 
                 message = new MailMessage(from, to)
@@ -134,15 +131,15 @@ namespace SaintSender.Core.Services
 
         private static bool TryToGetEmails(ICollection<CustoMail> emails)
         {
-            //if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(_pass))
-            //{
-            //    return false;
-            //}
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            {
+                return false;
+            }
 
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, _pass);
+                ImapClient.Authenticate(Email, Password);
                 ImapClient.SelectInbox();
 
                 var unseens = ImapClient.SearchMessageUids("Unseen");
@@ -202,7 +199,7 @@ namespace SaintSender.Core.Services
             using (ImapClient)
             {
                 ImapClient.Connect();
-                ImapClient.Authenticate(Email, _pass);
+                ImapClient.Authenticate(Email, Password);
                 ImapClient.SelectInbox();
 
                 foreach (var mail in emails)
