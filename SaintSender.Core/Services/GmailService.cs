@@ -244,7 +244,7 @@ namespace SaintSender.Core.Services
         {
             foreach (var id in ids)
             {
-                var clientMail = ImapClient.GetMessage(int.Parse(id));
+                var clientMail = ImapClient.GetMessage(id);
                 var custoMail = EmailConverter(clientMail, readOrNot);
                 custoMail.MessageNumber = int.Parse(id);
                 Backup.Add(custoMail);

@@ -44,7 +44,7 @@ namespace SaintSender.Core.Entities
                 return -1;
             }
 
-            return compared.Date == Date ? 1 : 0;
+            return compared.Date == Date ? 0 : 1;
         }
 
     }
