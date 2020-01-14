@@ -37,6 +37,9 @@
         <i:EventTrigger EventName="Closing">
             <i:InvokeCommandAction Command="{Binding ExitProgramCommand}" />
         </i:EventTrigger>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}" />
+        </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid Margin="50" >
         <Grid.ColumnDefinitions>

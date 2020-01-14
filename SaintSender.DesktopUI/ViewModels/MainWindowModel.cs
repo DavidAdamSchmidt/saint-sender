@@ -17,9 +17,6 @@ namespace SaintSender.DesktopUI.ViewModels
         public MainWindowModel()
         {
             SetCommands();
-
-            UserEmail = GmailService.Email;
-            SetEmails();
         }
 
         public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
@@ -41,6 +38,8 @@ namespace SaintSender.DesktopUI.ViewModels
             get => _loggingOut;
             set => SetProperty(ref _loggingOut, value);
         }
+
+        public DelegateCommand<string> WindowLoadedCommand { get; private set; }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
 
@@ -85,11 +84,18 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void SetCommands()
         {
+            WindowLoadedCommand = new DelegateCommand<string>(LoadEmails_Execute);
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
+        }
+
+        private void LoadEmails_Execute(string throwAway)
+        {
+            UserEmail = GmailService.Email;
+            SetEmails();
         }
 
         private async void Exit_Execute(string throwAway)
