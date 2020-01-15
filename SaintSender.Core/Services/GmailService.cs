@@ -26,7 +26,9 @@ namespace SaintSender.Core.Services
 
         static GmailService()
         {
-            ComponentInfo.SetLicense("FREE-LIMITED-KEY");
+            var license = Environment.GetEnvironmentVariable("gembox-license") ?? "FREE-LIMITED-KEY";
+            ComponentInfo.SetLicense(license);
+
             ImapClient = new ImapClient(ImapHost);
         }
 
