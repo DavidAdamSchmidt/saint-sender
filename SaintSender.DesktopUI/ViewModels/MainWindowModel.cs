@@ -107,11 +107,20 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void ReadEmail_Execute(ObservableEmail email)
         {
-            email.IsRead = true;
+            if (!email.IsRead)
+            {
+                _ = TryAsyncOperation(
+                    () => EmailService.MarkAsReadAsync(email),
+                    () => IsLoadingEmails = false);
+
+                email.IsRead = true;
+            }
+
             var emailDetailsDialog = new EmailDetailsWindow
             {
                 DataContext = new EmailDetailsWindowModel(email)
             };
+
             emailDetailsDialog.ShowDialog();
         }
 

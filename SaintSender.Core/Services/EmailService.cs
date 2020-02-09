@@ -221,5 +221,22 @@ namespace SaintSender.Core.Services
 
             inbox.Expunge();
         }
+
+        public async Task MarkAsReadAsync(ObservableEmail email)
+        {
+            await Task.Factory.StartNew(() => MarkAsRead(email));
+        }
+
+        public void MarkAsRead(ObservableEmail email)
+        {
+            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(_imapHost, 993, true);
+            client.Authenticate(EmailAddress, Password);
+
+            var inbox = client.Inbox;
+            inbox.Open(FolderAccess.ReadWrite);
+            inbox.AddFlags(new[] { email.MessageNumber }, MessageFlags.Seen, true);
+        }
     }
 }
