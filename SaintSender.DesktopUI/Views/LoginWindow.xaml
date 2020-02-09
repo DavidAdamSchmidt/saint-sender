@@ -15,6 +15,11 @@
     <Window.DataContext>
         <vm:LoginWindowModel />
     </Window.DataContext>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Window.Resources>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <conv:IntegerToBooleanConverter x:Key="IntegerToBooleanConverter" /> 
@@ -48,9 +53,6 @@
             <ComboBox IsEnabled="{Binding EmailAddresses.Count, Converter={StaticResource IntegerToBooleanConverter}}" x:Name="ChooseUser" Height="24" Width="18" IsTabStop="False"
                       ItemsSource="{Binding EmailAddresses}" SelectedItem="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="Loaded">
-                        <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}" />
-                    </i:EventTrigger>
                     <i:EventTrigger EventName="DropDownOpened">
                         <i:InvokeCommandAction Command="{Binding DropDownOpenedCommand}" />
                     </i:EventTrigger>
