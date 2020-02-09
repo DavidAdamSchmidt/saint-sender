@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace SaintSender.Core.Entities
 {
-    public class Email : ObservableBase, IComparable
+    public class ObservableEmail : ObservableBase, IComparable
     {
         private bool _isRead;
 
-        public InternetAddressList Sender { get; set; }
+        public InternetAddressList From { get; set; }
 
         public InternetAddressList To { get; set; }
 
@@ -22,7 +22,7 @@ namespace SaintSender.Core.Entities
 
         public string TextBody { get; set; }
 
-        public string BodyHtml { get; set; }
+        public string HtmlBody { get; set; }
 
         public bool IsRead
         {
@@ -36,11 +36,28 @@ namespace SaintSender.Core.Entities
 
         public DateTime Date { get; set; }
 
-        public string From => Sender.SingleOrDefault()?.ToString();
+        public string FirstSender => From.SingleOrDefault()?.ToString();
+
+        public static ObservableEmail ConvertFromMimeMessage(MimeMessage message, bool isRead)
+        {
+            return new ObservableEmail
+            {
+                Attachments = message.Attachments,
+                Bcc = message.Bcc,
+                Cc = message.Cc,
+                HtmlBody = message.HtmlBody,
+                TextBody = message.TextBody,
+                From = message.From,
+                Subject = message.Subject,
+                To = message.To,
+                Date = message.Date.DateTime,
+                IsRead = isRead
+            };
+        }
 
         public int CompareTo(object other)
         {
-            var compared = (Email)other;
+            var compared = (ObservableEmail)other;
             if (compared.Date < Date)
             {
                 return -1;

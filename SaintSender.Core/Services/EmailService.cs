@@ -1,7 +1,6 @@
 ﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using MimeKit;
 using SaintSender.Core.Entities;
 using System;
 using System.Collections.Generic;
@@ -120,12 +119,12 @@ namespace SaintSender.Core.Services
             }
         }
 
-        public async Task UpdateAsync(AsyncObservableCollection<Email> emails)
+        public async Task UpdateAsync(AsyncObservableCollection<ObservableEmail> emails)
         {
             await Task.Factory.StartNew(() => Update(emails));
         }
 
-        public void Update(ICollection<Email> emails)
+        public void Update(ICollection<ObservableEmail> emails)
         {
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
@@ -141,7 +140,7 @@ namespace SaintSender.Core.Services
             foreach (var item in items.Reverse())
             {
                 var message = inbox.GetMessage(item.UniqueId);
-                var converted = EmailConverter(message, (item.Flags & MessageFlags.Seen) != 0);
+                var converted = ObservableEmail.ConvertFromMimeMessage(message, (item.Flags & MessageFlags.Seen) != 0);
 
                 converted.MessageNumber = item.UniqueId;
                 emails.Add(converted);
@@ -150,12 +149,12 @@ namespace SaintSender.Core.Services
             client.Disconnect(true);
         }
 
-        public async Task<bool> SaveAsync(Email email)
+        public async Task<bool> SaveAsync(ObservableEmail email)
         {
             return await Task.Factory.StartNew(() => Save(email));
         }
 
-        public bool Save(Email email)
+        public bool Save(ObservableEmail email)
         {
             var currentDirectory = Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}\SavedEmails");
             var fileName = string.Concat(email.MessageNumber, email.Subject);
@@ -181,12 +180,12 @@ namespace SaintSender.Core.Services
             return overwritten;
         }
 
-        public async Task DeleteAsync(Email email)
+        public async Task DeleteAsync(ObservableEmail email)
         {
             await Task.Factory.StartNew(() => Delete(email));
         }
 
-        public void Delete(Email email)
+        public void Delete(ObservableEmail email)
         {
             var currentDirectory = $@"{Directory.GetCurrentDirectory()}\SavedEmails";
             var files = Directory.GetFiles(currentDirectory);
@@ -212,25 +211,6 @@ namespace SaintSender.Core.Services
             inbox.AddFlags(new[] { email.MessageNumber }, MessageFlags.Deleted, true);
 
             inbox.Expunge();
-        }
-
-        public Email EmailConverter(MimeMessage clientMail, bool readOrNot)
-        {
-            var mail = new Email
-            {
-                Attachments = clientMail.Attachments,
-                Bcc = clientMail.Bcc,
-                Cc = clientMail.Cc,
-                BodyHtml = clientMail.HtmlBody,
-                TextBody = clientMail.TextBody,
-                Sender = clientMail.From,
-                Subject = clientMail.Subject,
-                To = clientMail.To,
-                Date = clientMail.Date.DateTime,
-                IsRead = readOrNot
-            };
-
-            return mail;
         }
     }
 }

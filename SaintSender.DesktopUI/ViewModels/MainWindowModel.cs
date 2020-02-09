@@ -8,7 +8,7 @@ namespace SaintSender.DesktopUI.ViewModels
 {
     public class MainWindowModel : ViewModelBase
     {
-        private string _email;
+        private string _emailAddress;
         private bool _loadingEmails;
         private bool _loggingOut;
 
@@ -17,12 +17,12 @@ namespace SaintSender.DesktopUI.ViewModels
             SetCommands();
         }
 
-        public AsyncObservableCollection<Email> Emails { get; } = new AsyncObservableCollection<Email>();
+        public AsyncObservableCollection<ObservableEmail> Emails { get; } = new AsyncObservableCollection<ObservableEmail>();
 
-        public string UserEmail
+        public string EmailAddress
         {
-            get => _email;
-            set => SetProperty(ref _email, string.IsNullOrEmpty(value) ? value : $"Hello, {value}");
+            get => _emailAddress;
+            set => SetProperty(ref _emailAddress, string.IsNullOrEmpty(value) ? value : $"Hello, {value}");
         }
 
         public bool IsLoadingEmails
@@ -43,7 +43,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
-        public DelegateCommand<Email> ReadDoubleClickedEmail { get; private set; }
+        public DelegateCommand<ObservableEmail> ReadDoubleClickedEmail { get; private set; }
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
@@ -78,19 +78,19 @@ namespace SaintSender.DesktopUI.ViewModels
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
-            ReadDoubleClickedEmail = new DelegateCommand<Email>(ReadEmail_Execute, ReadEmail_CanExecute);
+            ReadDoubleClickedEmail = new DelegateCommand<ObservableEmail>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
         }
 
         private void LoadEmails_Execute(string throwAway)
         {
-            UserEmail = EmailService.Email;
+            EmailAddress = EmailService.Email;
             SetEmails();
         }
 
         private void Exit_Execute(string throwAway)
         {
-            UserEmail = string.Empty;
+            EmailAddress = string.Empty;
             IsLoggingOut = true;
         }
 
@@ -106,7 +106,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void Logout_Execute(Button button)
         {
-            UserEmail = string.Empty;
+            EmailAddress = string.Empty;
             IsLoggingOut = true;
 
             var loginWindow = new LoginWindow();
@@ -122,7 +122,7 @@ namespace SaintSender.DesktopUI.ViewModels
             return SetCommandAvailability();
         }
 
-        private void ReadEmail_Execute(Email email)
+        private void ReadEmail_Execute(ObservableEmail email)
         {
             email.IsRead = true;
             var emailDetailsDialog = new EmailDetailsWindow
@@ -132,7 +132,7 @@ namespace SaintSender.DesktopUI.ViewModels
             emailDetailsDialog.ShowDialog();
         }
 
-        private bool ReadEmail_CanExecute(Email email)
+        private bool ReadEmail_CanExecute(ObservableEmail email)
         {
             return SetCommandAvailability();
         }

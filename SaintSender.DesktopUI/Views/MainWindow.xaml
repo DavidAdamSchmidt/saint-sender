@@ -61,7 +61,7 @@
             </Button>
             <fa:ImageAwesome Visibility="{Binding IsLoadingEmails, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </StackPanel>
-        <Label Grid.Column="2" Grid.Row="0" Content="{Binding UserEmail}"
+        <Label Grid.Column="2" Grid.Row="0" Content="{Binding EmailAddress}"
                Width="Auto" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" />
         <fa:ImageAwesome Grid.Column="2" Grid.Row="0" Visibility="{Binding IsLoggingOut, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <Button Grid.Column="3" Grid.Row="0" x:Name="Logout" HorizontalAlignment="Right"
@@ -81,7 +81,7 @@
                     <StackPanel x:Name="Item">
                         <TextBlock Text="{Binding Path=Subject}"
                                    FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />
-                        <TextBlock Text="{Binding Path=From}"
+                        <TextBlock Text="{Binding Path=FirstSender}"
                                    FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />
                         <TextBlock Text="{Binding Path=Date}"
                                    FontWeight="{Binding IsRead, Converter={StaticResource BoolToFont}}" />

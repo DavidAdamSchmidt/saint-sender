@@ -11,14 +11,14 @@ namespace SaintSender.DesktopUI.ViewModels
         private bool _deletingEmail;
         private bool _savingEmail;
 
-        public EmailDetailsWindowModel(Email email)
+        public EmailDetailsWindowModel(ObservableEmail email)
         {
             Email = email;
 
             SetCommands();
         }
 
-        public Email Email { get; set; }
+        public ObservableEmail Email { get; set; }
 
         public bool IsDeletingEmail
         {

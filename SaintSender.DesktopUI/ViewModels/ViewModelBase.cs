@@ -3,14 +3,14 @@ using SaintSender.Core.Services;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class ViewModelBase : ObservableBase
+    public abstract class ViewModelBase : ObservableBase
     {
-        public ViewModelBase()
+        protected ViewModelBase()
+            : this(new EmailService("gmail.com"))
         {
-            EmailService = new EmailService("gmail.com");
         }
 
-        public ViewModelBase(EmailService emailService)
+        protected ViewModelBase(EmailService emailService)
         {
             EmailService = emailService;
         }

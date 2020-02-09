@@ -60,7 +60,7 @@
   <ItemGroup>
     <Compile Include="Entities\AsyncObservableCollection.cs" />
     <Compile Include="Entities\ObservableBase.cs" />
-    <Compile Include="Entities\Email.cs" />
+    <Compile Include="Entities\ObservableEmail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
     <Compile Include="Entities\UserInfo.cs" />
     <Compile Include="Services\EncryptionService.cs" />
