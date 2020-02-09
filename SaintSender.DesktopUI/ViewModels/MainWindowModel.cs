@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using SaintSender.Core.Entities;
+using SaintSender.DesktopUI.Views;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using SaintSender.Core.Entities;
-using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -69,7 +69,9 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private async Task FillEmailCollection()
         {
-            await EmailService.UpdateAsync(Emails);
+            await TryAsyncOperation(
+                async () => await EmailService.UpdateAsync(Emails),
+                () => IsLoadingEmails = false);
         }
 
         private void SetCommands()

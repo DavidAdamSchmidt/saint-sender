@@ -56,7 +56,10 @@ namespace SaintSender.DesktopUI.ViewModels
         private async void SaveToFile_Execute(Button button)
         {
             IsSavingEmail = true;
-            var overwritten = await EmailService.SaveAsync(Email);
+
+            var overwritten = await TryAsyncOperation(
+                async () => await EmailService.SaveAsync(Email),
+                () => IsSavingEmail = false);
 
             IsSavingEmail = false;
 
@@ -74,7 +77,9 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsDeletingEmail = true;
 
-            await EmailService.DeleteAsync(Email);
+            await TryAsyncOperation(
+                async () => await EmailService.DeleteAsync(Email),
+                () => IsDeletingEmail = false);
 
             IsDeletingEmail = false;
 
