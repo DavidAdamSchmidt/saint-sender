@@ -12,6 +12,7 @@ namespace SaintSender.DesktopUI.ViewModels
     public class LoginWindowModel : ViewModelBase
     {
         private string _email;
+        private string _selectedUser;
         private bool _sending;
         private List<UserInfo> _userData;
 
@@ -41,11 +42,17 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
+        public string SelectedUser
+        {
+            get => _selectedUser;
+            set => SetProperty(ref _selectedUser, value);
+        }
+
         public AsyncObservableCollection<string> EmailAddresses { get; } = new AsyncObservableCollection<string>();
 
-        public string SelectedUser { get; set; }
-
         public DelegateCommand<string> WindowLoadedCommand { get; private set; }
+
+        public DelegateCommand<string> DropDownOpenedCommand { get; private set; }
 
         public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
 
@@ -53,7 +60,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> PasswordChangedCommand { get; private set; }
 
-        public DelegateCommand<PasswordBox> FillLoginDetails { get; private set; }
+        public DelegateCommand<PasswordBox> SelectionChangedCommand { get; private set; }
 
         private void SetCommands()
         {
@@ -61,7 +68,8 @@ namespace SaintSender.DesktopUI.ViewModels
             CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
             SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute, AuthenticateLogin_CanExecute);
             PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
-            FillLoginDetails = new DelegateCommand<PasswordBox>(AutoFillLoginDetails_Execute);
+            SelectionChangedCommand = new DelegateCommand<PasswordBox>(AutoFillLoginDetails_Execute);
+            DropDownOpenedCommand = new DelegateCommand<string>(ResetSelected_Execute);
         }
 
         private void RetrieveUserData_Execute(string throwAway)
@@ -80,6 +88,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void AutoFillLoginDetails_Execute(PasswordBox passwordBox)
         {
+            if (SelectedUser == null)
+            {
+                return;
+            }
+
             Email = SelectedUser;
 
             foreach (var user in _userData.Where(user => user.Email.Equals(SelectedUser)))
@@ -87,6 +100,11 @@ namespace SaintSender.DesktopUI.ViewModels
                 passwordBox.Password = user.Password;
                 break;
             }
+        }
+
+        private void ResetSelected_Execute(string throwAway)
+        {
+            SelectedUser = null;
         }
 
         private void CancelLogin_Execute(PasswordBox passwordBox)

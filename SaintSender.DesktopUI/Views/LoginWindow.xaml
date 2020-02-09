@@ -51,9 +51,12 @@
                     <i:EventTrigger EventName="Loaded">
                         <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}" />
                     </i:EventTrigger>
+                    <i:EventTrigger EventName="DropDownOpened">
+                        <i:InvokeCommandAction Command="{Binding DropDownOpenedCommand}" />
+                    </i:EventTrigger>
                     <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction
-                            Command="{Binding FillLoginDetails}" CommandParameter="{Binding ElementName=PwBxPassword}" />
+                            Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=PwBxPassword}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ComboBox>
