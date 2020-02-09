@@ -50,7 +50,7 @@ namespace SaintSender.Core.Services
 
             if (!email.EndsWith(_domain))
             {
-                email += _domain;
+                email += $"@{_domain}";
             }
 
             using var client = SetupImapClient(false);
