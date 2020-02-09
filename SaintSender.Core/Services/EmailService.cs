@@ -17,17 +17,24 @@ namespace SaintSender.Core.Services
         private readonly string _domain;
         private readonly string _imapHost;
         private readonly string _smtpHost;
+        private readonly EncryptionService _encryptionService;
 
         public EmailService(string domain)
+            : this(domain, new EncryptionService())
+        {
+        }
+
+        public EmailService(string domain, EncryptionService encryptionService)
         {
             _domain = domain;
             _imapHost = $"imap.{_domain}";
             _smtpHost = $"smtp.{_domain}";
+            _encryptionService = encryptionService;
         }
 
-        public string Email => EncryptionService.RetrieveData().Email;
+        public static string EmailAddress { get; private set; }
 
-        private string Password => EncryptionService.RetrieveData().Password;
+        private string Password => _encryptionService.RetrievePassword(EmailAddress);
 
         public async Task<bool> AuthenticateAsync(string email, string password)
         {
@@ -63,7 +70,9 @@ namespace SaintSender.Core.Services
 
             if (client.IsAuthenticated)
             {
-                EncryptionService.SaveData(email, password);
+                EmailAddress = email;
+
+                _encryptionService.SaveData(email, password);
             }
 
             return true;
@@ -81,7 +90,7 @@ namespace SaintSender.Core.Services
 
             try
             {
-                var from = new MailAddress(Email);
+                var from = new MailAddress(EmailAddress);
                 var to = new MailAddress(recipient);
 
                 smtp = new SmtpClient
@@ -129,7 +138,7 @@ namespace SaintSender.Core.Services
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
             client.Connect(_imapHost, 993, true);
-            client.Authenticate(Email, Password);
+            client.Authenticate(EmailAddress, Password);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadOnly);
@@ -169,7 +178,7 @@ namespace SaintSender.Core.Services
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
             client.Connect(_imapHost, 993, true);
-            client.Authenticate(Email, Password);
+            client.Authenticate(EmailAddress, Password);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadOnly);
@@ -204,7 +213,7 @@ namespace SaintSender.Core.Services
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
             client.Connect(_imapHost, 993, true);
-            client.Authenticate(Email, Password);
+            client.Authenticate(EmailAddress, Password);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadWrite);

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
+using SaintSender.Core.Exceptions;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
 
@@ -12,12 +13,10 @@ namespace SaintSender.DesktopUI.ViewModels
     {
         private string _email;
         private bool _sending;
-        private readonly IList<UserInfo> _userData;
+        private List<UserInfo> _userData;
 
         public LoginWindowModel()
         {
-            _userData = EncryptionService.RetrieveAllData();
-
             SetCommands();
         }
 
@@ -42,9 +41,11 @@ namespace SaintSender.DesktopUI.ViewModels
             }
         }
 
-        public IList<string> Users => (from user in _userData select user.Email).ToList();
+        public AsyncObservableCollection<string> EmailAddresses { get; } = new AsyncObservableCollection<string>();
 
         public string SelectedUser { get; set; }
+
+        public DelegateCommand<string> WindowLoadedCommand { get; private set; }
 
         public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
 
@@ -56,23 +57,33 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void SetCommands()
         {
+            WindowLoadedCommand = new DelegateCommand<string>(RetrieveUserData_Execute);
             CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
             SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute, AuthenticateLogin_CanExecute);
             PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
             FillLoginDetails = new DelegateCommand<PasswordBox>(AutoFillLoginDetails_Execute);
         }
 
+        private void RetrieveUserData_Execute(string throwAway)
+        {
+            try
+            {
+                _userData = new EncryptionService().RetrieveAllData();
+            }
+            catch (DataRetrievalException)
+            {
+                _userData = new List<UserInfo>();
+            }
+
+            _userData.ForEach(x => EmailAddresses.Add(x.Email));
+        }
+
         private void AutoFillLoginDetails_Execute(PasswordBox passwordBox)
         {
             Email = SelectedUser;
 
-            foreach (var user in _userData)
+            foreach (var user in _userData.Where(user => user.Email.Equals(SelectedUser)))
             {
-                if (!user.Email.Equals(SelectedUser))
-                {
-                    continue;
-                }
-
                 passwordBox.Password = user.Password;
                 break;
             }

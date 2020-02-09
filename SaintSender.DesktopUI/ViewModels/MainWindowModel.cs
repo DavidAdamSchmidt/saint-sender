@@ -84,7 +84,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private void LoadEmails_Execute(string throwAway)
         {
-            EmailAddress = EmailService.Email;
+            EmailAddress = Core.Services.EmailService.EmailAddress;
             SetEmails();
         }
 

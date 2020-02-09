@@ -63,6 +63,7 @@
     <Compile Include="Entities\ObservableEmail.cs" />
     <Compile Include="Entities\DelegateCommand.cs" />
     <Compile Include="Entities\UserInfo.cs" />
+    <Compile Include="Exceptions\DataRetrievalException.cs" />
     <Compile Include="Services\EncryptionService.cs" />
     <Compile Include="Services\EmailService.cs" />
     <Compile Include="Services\GreetService.cs" />
@@ -76,5 +77,6 @@
     <None Include="ReadMe.md" />
     <None Include="Services\ReadMe.md" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

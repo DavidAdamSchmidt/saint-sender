@@ -1,122 +1,134 @@
-﻿using System;
+﻿using SaintSender.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using System.Windows;
-using SaintSender.Core.Entities;
+using SaintSender.Core.Exceptions;
 
 namespace SaintSender.Core.Services
 {
-    public static class EncryptionService
+    public class EncryptionService
     {
-        private static string _filePath;
         private const string KeyContainerName = "MPPOFKWE12312312";
 
-        private static string CreateDirectory()
+        public List<UserInfo> RetrieveAllData()
         {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            var dataDirectory = currentDirectory + @"\Data";
-            Directory.CreateDirectory(dataDirectory);
-            return dataDirectory;
+            var directory = GetDirectory();
+            var filePaths = Directory.GetFiles(directory).ToList();
+
+            return filePaths
+                .Select(RetrieveData)
+                .Where(userInfo => !string.IsNullOrEmpty(userInfo.Email))
+                .ToList();
         }
 
-        private static string DecryptFile(string path)
+        public string RetrievePassword(string emailAddress)
         {
-            try
-            {
-                File.Decrypt(path);
-            }
-            catch (Exception e) when (e is ArgumentException || e is IOException)
-            {
-                MessageBox.Show("The directory or file could not be loaded!", "Directory Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (NotSupportedException)
-            {
-                MessageBox.Show("Your operation is not supported, please report this error!", "Unknown Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                MessageBox.Show("You are trying to open files not supported by your Account!", "Unauthorized Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return path;
+            return RetrieveData(GetFilePath(emailAddress)).Password;
         }
 
-        private static void EncryptFile()
+        public void SaveData(string emailAddress, string password)
         {
-            File.Encrypt(_filePath);
-        }
+            var path = CreateFile(emailAddress);
 
-        private static void CreateFile(string fileName)
-        {
-            var bytes = Encoding.ASCII.GetBytes(fileName);
-            var dataDirectory = CreateDirectory();
-            _filePath = $@"{dataDirectory}\{string.Join("", bytes)}.txt";
-            if (!File.Exists(_filePath))
-            {
-                File.Create(_filePath).Dispose();
-            }
-        }
+            var saveDataOne = RsaEncrypt(emailAddress);
+            var saveDataTwo = RsaEncrypt(password);
 
-        public static void SaveData(string dataOne, string dataTwo)
-        {
-            CreateFile(dataOne);
-            var formatter = new BinaryFormatter();
-            var saveDataOne = RsaEncrypt(dataOne);
-            var saveDataTwo = RsaEncrypt(dataTwo);
-            using (var stream = new FileStream(_filePath, FileMode.Open, FileAccess.Write))
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Write))
             {
+                var formatter = new BinaryFormatter();
+
                 formatter.Serialize(stream, saveDataOne);
                 formatter.Serialize(stream, saveDataTwo);
             }
-            EncryptFile();
+
+            File.Encrypt(path);
         }
 
-        public static UserInfo RetrieveData()
+        private UserInfo RetrieveData(string filePath)
         {
-            UserInfo userInfo = null;
-
             var formatter = new BinaryFormatter();
-            using (var fileStream = new FileStream(DecryptFile(_filePath), FileMode.Open, FileAccess.Read))
-            {
-                if (fileStream.Length != 0)
-                {
-                    userInfo = new UserInfo
-                    {
-                        Email = RsaDecrypt((string) formatter.Deserialize(fileStream)),
-                        Password = RsaDecrypt((string) formatter.Deserialize(fileStream))
 
-                    };
-                }
-                EncryptFile();
+            try
+            {
+                File.Decrypt(filePath);
+            }
+            catch (Exception e) when (e is ArgumentException || e is IOException)
+            {
+                throw new DataRetrievalException("The directory or file could not be loaded.");
+            }
+            catch (NotSupportedException e)
+            {
+                throw new DataRetrievalException("Unsupported operation.", e);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                throw new DataRetrievalException("Access denied.", e);
             }
 
-            return userInfo;
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+            try
+            {
+                if (fileStream.Length == 0)
+                {
+                    return null;
+                }
+
+                return new UserInfo
+                {
+                    Email = RsaDecrypt((string) formatter.Deserialize(fileStream)),
+                    Password = RsaDecrypt((string) formatter.Deserialize(fileStream))
+
+                };
+            }
+            catch (SerializationException e)
+            {
+                throw new DataRetrievalException("Unsuccessful serialization.", e);
+            }
+            finally
+            {
+                File.Encrypt(filePath);
+            }
         }
 
-        public static IList<UserInfo> RetrieveAllData()
+        private string GetDirectory()
         {
-            var userData = new List<UserInfo>();
-            var directory = CreateDirectory();
-            var filePaths = Directory.GetFiles(directory).ToList();
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var dataDirectory = currentDirectory + @"\Data";
 
-            foreach (var file in filePaths)
-            {
-                _filePath = file;
-                var userInfo = RetrieveData();
-                if (!string.IsNullOrEmpty(userInfo.Email))
-                {
-                    userData.Add(userInfo);
-                }
-            }
+            Directory.CreateDirectory(dataDirectory);
 
-            return userData;
+            return dataDirectory;
         }
 
-        private static string RsaEncrypt(string value)
+        private string GetFilePath(string emailAddress)
+        {
+            var bytes = Encoding.ASCII.GetBytes(emailAddress);
+            var dataDirectory = GetDirectory();
+
+            return $@"{dataDirectory}\{string.Join("", bytes)}.txt";
+        }
+
+        private string CreateFile(string fileName)
+        {
+            var bytes = Encoding.ASCII.GetBytes(fileName);
+            var dataDirectory = GetDirectory();
+            var filePath = $@"{dataDirectory}\{string.Join("", bytes)}.txt";
+
+            if (!File.Exists(filePath))
+            {
+                File.Create(filePath).Dispose();
+            }
+
+            return filePath;
+        }
+
+        private string RsaEncrypt(string value)
         {
             var plaintext = Encoding.Unicode.GetBytes(value);
 
@@ -124,14 +136,13 @@ namespace SaintSender.Core.Services
             {
                 KeyContainerName = KeyContainerName
             };
-            using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
-            {
-                var encryptedData = rsa.Encrypt(plaintext, false);
-                return Convert.ToBase64String(encryptedData);
-            }
+            using var rsa = new RSACryptoServiceProvider(2048, cspParams);
+            var encryptedData = rsa.Encrypt(plaintext, false);
+
+            return Convert.ToBase64String(encryptedData);
         }
 
-        private static string RsaDecrypt(string value)
+        private string RsaDecrypt(string value)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -144,11 +155,11 @@ namespace SaintSender.Core.Services
             {
                 KeyContainerName = KeyContainerName
             };
-            using (var rsa = new RSACryptoServiceProvider(2048, cspParams))
-            {
-                var decryptedData = rsa.Decrypt(encryptedData, false);
-                return Encoding.Unicode.GetString(decryptedData);
-            }
+
+            using var rsa = new RSACryptoServiceProvider(2048, cspParams);
+            var decryptedData = rsa.Decrypt(encryptedData, false);
+
+            return Encoding.Unicode.GetString(decryptedData);
         }
     }
 }
