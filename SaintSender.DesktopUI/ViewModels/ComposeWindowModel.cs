@@ -63,7 +63,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsSending = true;
 
-            var sent = await GmailService.SendMail(_recipient, _subject, _message);
+            var sent = await GmailService.SendAsync(_recipient, _subject, _message);
 
             IsSending = false;
 

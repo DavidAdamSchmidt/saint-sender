@@ -94,7 +94,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsSending = true;
 
-            var result = await GmailService.Authenticate(_email, passwordBox.Password);
+            var result = await GmailService.AuthenticateAsync(_email, passwordBox.Password);
 
             if (result)
             {

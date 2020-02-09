@@ -12,7 +12,6 @@ namespace SaintSender.DesktopUI.ViewModels
         private string _email;
         private bool _loadingEmails;
         private bool _loggingOut;
-        private bool _maxRefreshCapacityReached;
 
         public MainWindowModel()
         {
@@ -71,15 +70,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private async Task FillEmailCollection()
         {
-            _maxRefreshCapacityReached = !await GmailService.FillEmailCollection(Emails);
-
-            if (_maxRefreshCapacityReached)
-            {
-                IsLoadingEmails = false;
-
-                MessageBox.Show("Reached maximum e-mail limit. The refresh functionality will be disabled.",
-                    "Free limited-key alert", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
+            await GmailService.UpdateAsync(Emails);
         }
 
         private void SetCommands()
@@ -98,11 +89,10 @@ namespace SaintSender.DesktopUI.ViewModels
             SetEmails();
         }
 
-        private async void Exit_Execute(string throwAway)
+        private void Exit_Execute(string throwAway)
         {
             UserEmail = string.Empty;
             IsLoggingOut = true;
-            await GmailService.Flush(Emails);
         }
 
         private void SendNew_Execute(string throwAway)
@@ -115,11 +105,10 @@ namespace SaintSender.DesktopUI.ViewModels
             return SetCommandAvailability();
         }
 
-        private async void Logout_Execute(Button button)
+        private void Logout_Execute(Button button)
         {
             UserEmail = string.Empty;
             IsLoggingOut = true;
-            await GmailService.Flush(Emails);
 
             var loginWindow = new LoginWindow();
 
@@ -153,7 +142,6 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsLoadingEmails = true;
 
-            await GmailService.Flush(Emails);
             Emails.Clear();
             await FillEmailCollection();
 
@@ -162,7 +150,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool RefreshEmails_CanExecute(string throwAway)
         {
-            return !_maxRefreshCapacityReached && SetCommandAvailability();
+            return SetCommandAvailability();
         }
 
         private bool SetCommandAvailability()

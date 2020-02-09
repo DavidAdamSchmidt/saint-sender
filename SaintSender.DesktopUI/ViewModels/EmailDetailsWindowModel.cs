@@ -56,8 +56,7 @@ namespace SaintSender.DesktopUI.ViewModels
         private async void SaveToFile_Execute(Button button)
         {
             IsSavingEmail = true;
-
-            var overwritten = await GmailService.SaveEmailToFile(Email);
+            var overwritten = await GmailService.SaveAsync(Email);
 
             IsSavingEmail = false;
 
@@ -75,7 +74,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsDeletingEmail = true;
 
-            await GmailService.DeleteEmail(Email);
+            await GmailService.DeleteAsync(Email);
 
             IsDeletingEmail = false;
 

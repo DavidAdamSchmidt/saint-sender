@@ -1,15 +1,15 @@
-﻿using System;
+﻿using MailKit;
+using MailKit.Net.Imap;
+using MailKit.Security;
+using MimeKit;
+using SaintSender.Core.Entities;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using GemBox.Email;
-using GemBox.Email.Imap;
-using MailAddress = System.Net.Mail.MailAddress;
-using MailMessage = System.Net.Mail.MailMessage;
-using GemBoxMail = GemBox.Email.MailMessage;
-using SaintSender.Core.Entities;
-using System.IO;
 
 namespace SaintSender.Core.Services
 {
@@ -17,65 +17,19 @@ namespace SaintSender.Core.Services
     {
         private const string ImapHost = "imap.gmail.com";
         private const string SmtpHost = "smtp.gmail.com";
-        private static readonly ImapClient ImapClient;
-        private static readonly List<CustoMail> Backup = new List<CustoMail>();
 
         public static string Email => EncryptionService.RetrieveData().Email;
 
         private static string Password => EncryptionService.RetrieveData().Password;
 
-        static GmailService()
+        public static async Task<bool> AuthenticateAsync(string email, string password)
         {
-            var license = Environment.GetEnvironmentVariable("gembox-license") ?? "FREE-LIMITED-KEY";
-            ComponentInfo.SetLicense(license);
-
-            ImapClient = new ImapClient(ImapHost);
+            return await Task.Factory.StartNew(() => Authenticate(email, password));
         }
 
-        public static async Task<bool> Authenticate(string email, string password)
+        public static bool Authenticate(string email, string password)
         {
-            return await Task.Factory.StartNew(() => TryToAuthenticate(email, password));
-        }
-
-        public static async Task<bool> SendMail(string recipient, string subject, string body)
-        {
-            return await Task.Factory.StartNew(() => TryToSendMail(recipient, subject, body));
-        }
-
-        public static async Task<bool> FillEmailCollection(AsyncObservableCollection<CustoMail> emails)
-        {
-            try
-            {
-                return await Task.Factory.StartNew(() => TryToFillEmailCollection(emails));
-            }
-            catch (FreeLimitReachedException)
-            {
-                await Flush(Backup);
-
-                Backup.Clear();
-
-                return false;
-            }
-        }
-
-        public static async Task<bool> SaveEmailToFile(CustoMail mail)
-        {
-            return await Task.Factory.StartNew(() => TryToSaveEmailToFile(mail));
-        }
-
-        public static async Task DeleteEmail(CustoMail mail)
-        {
-            await Task.Factory.StartNew(() => TryToDeleteEmail(mail));
-        }
-
-        public static async Task Flush(IEnumerable<CustoMail> emails)
-        {
-            await Task.Factory.StartNew(() => TryToFlush(emails));
-        }
-
-        private static bool TryToAuthenticate(string email, string password)
-        {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 return false;
             }
@@ -87,29 +41,35 @@ namespace SaintSender.Core.Services
                 email += domain;
             }
 
-            using (ImapClient)
+            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(ImapHost, 993, true);
+
+            try
             {
-                ImapClient.Connect();
-
-                try
-                {
-                    ImapClient.Authenticate(email, password);
-                }
-                catch (Exception e) when(e is InvalidOperationException || e is ArgumentException)
-                {
-                    return false;
-                }
-
-                if (ImapClient.IsAuthenticated)
-                {
-                    EncryptionService.SaveData(email, password);
-                }
-
-                return ImapClient.IsAuthenticated;
+                client.Authenticate(email, password);
             }
+            catch (Exception e) when (e is AuthenticationException)
+            {
+                client.Dispose();
+
+                return false;
+            }
+
+            if (client.IsAuthenticated)
+            {
+                EncryptionService.SaveData(email, password);
+            }
+
+            return true;
         }
 
-        private static bool TryToSendMail(string recipient, string subject, string body)
+        public static async Task<bool> SendAsync(string recipient, string subject, string body)
+        {
+            return await Task.Factory.StartNew(() => Send(recipient, subject, body));
+        }
+
+        public static bool Send(string recipient, string subject, string body)
         {
 
             SmtpClient smtp = null;
@@ -140,7 +100,11 @@ namespace SaintSender.Core.Services
 
                 return true;
             }
-            catch (Exception ex) when(IsHandledForSendingFailure(ex))
+            catch (Exception e) when (
+                e is InvalidOperationException ||
+                e is SmtpException ||
+                e is ArgumentException ||
+                e is FormatException)
             {
                 return false;
             }
@@ -151,33 +115,42 @@ namespace SaintSender.Core.Services
             }
         }
 
-        private static bool TryToFillEmailCollection(ICollection<CustoMail> emails)
+        public static async Task UpdateAsync(AsyncObservableCollection<CustoMail> emails)
         {
-            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
-            {
-                return false;
-            }
-
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-
-                
-                var unseens = ImapClient.SearchMessageUids("Unseen");
-                var seens = ImapClient.SearchMessageUids("Seen");
-
-                FillEmailCollectionByIds(unseens, false);
-                FillEmailCollectionByIds(seens, true);
-                Backup.Sort();
-                Backup.ForEach(emails.Add);
-                Backup.Clear();
-                return true;
-            }
+            await Task.Factory.StartNew(() => Update(emails));
         }
 
-        private static bool TryToSaveEmailToFile(CustoMail mail)
+        public static void Update(ICollection<CustoMail> emails)
+        {
+            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(ImapHost, 993, true);
+            client.Authenticate(Email, Password);
+
+            var inbox = client.Inbox;
+            inbox.Open(FolderAccess.ReadOnly);
+
+            var items = inbox.Fetch(0, -1,
+                MessageSummaryItems.UniqueId | MessageSummaryItems.Size | MessageSummaryItems.Flags);
+
+            foreach (var item in items.Reverse())
+            {
+                var message = inbox.GetMessage(item.UniqueId);
+                var converted = EmailConverter(message, (item.Flags & MessageFlags.Seen) != 0);
+
+                converted.MessageNumber = item.UniqueId;
+                emails.Add(converted);
+            }
+
+            client.Disconnect(true);
+        }
+
+        public static async Task<bool> SaveAsync(CustoMail mail)
+        {
+            return await Task.Factory.StartNew(() => Save(mail));
+        }
+
+        public static bool Save(CustoMail mail)
         {
             var currentDirectory = Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}\SavedEmails");
             var fileName = string.Concat(mail.MessageNumber, mail.Subject);
@@ -189,36 +162,26 @@ namespace SaintSender.Core.Services
 
             var overwritten = !string.IsNullOrEmpty(File.ReadAllText(filePath));
 
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-                ImapClient.SaveMessage(mail.MessageNumber, filePath);
-            }
+            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(ImapHost, 993, true);
+            client.Authenticate(Email, Password);
+
+            var inbox = client.Inbox;
+            inbox.Open(FolderAccess.ReadOnly);
+
+            var message = inbox.GetMessage(mail.MessageNumber);
+            message.WriteTo(filePath);
 
             return overwritten;
         }
 
-        private static void TryToFlush(IEnumerable<CustoMail> emails)
+        public static async Task DeleteAsync(CustoMail mail)
         {
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-
-                foreach (var mail in emails)
-                {
-                    if (!mail.IsRead)
-                    {
-                        ImapClient.SetMessageFlags(mail.MessageNumber, "Unseen");
-                    }
-                }
-            }
+            await Task.Factory.StartNew(() => Delete(mail));
         }
 
-        private static void TryToDeleteEmail(CustoMail mail)
+        public static void Delete(CustoMail mail)
         {
             var currentDirectory = $@"{Directory.GetCurrentDirectory()}\SavedEmails";
             var files = Directory.GetFiles(currentDirectory);
@@ -233,51 +196,36 @@ namespace SaintSender.Core.Services
                 File.Delete(file);
                 break;
             }
-            using (ImapClient)
-            {
-                ImapClient.Connect();
-                ImapClient.Authenticate(Email, Password);
-                ImapClient.SelectInbox();
-                ImapClient.DeleteMessage(mail.MessageNumber, true);
-            }
+
+            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(ImapHost, 993, true);
+            client.Authenticate(Email, Password);
+
+            var inbox = client.Inbox;
+            inbox.Open(FolderAccess.ReadWrite);
+            inbox.AddFlags(new[] { mail.MessageNumber }, MessageFlags.Deleted, true);
+
+            inbox.Expunge();
         }
 
-        private static void FillEmailCollectionByIds(IEnumerable<string> ids, bool readOrNot)
-        {
-            foreach (var id in ids)
-            {
-                var clientMail = ImapClient.GetMessage(id);
-                var custoMail = EmailConverter(clientMail, readOrNot);
-                custoMail.MessageNumber = int.Parse(id);
-                Backup.Add(custoMail);
-            }
-        }
-
-        private static CustoMail EmailConverter(GemBoxMail clientMail, bool readOrNot)
+        public static CustoMail EmailConverter(MimeMessage clientMail, bool readOrNot)
         {
             var mail = new CustoMail
             {
                 Attachments = clientMail.Attachments,
                 Bcc = clientMail.Bcc,
                 Cc = clientMail.Cc,
-                BodyHtml = clientMail.BodyHtml,
-                TextBody = clientMail.BodyText,
+                BodyHtml = clientMail.HtmlBody,
+                TextBody = clientMail.TextBody,
                 Sender = clientMail.From,
                 Subject = clientMail.Subject,
                 To = clientMail.To,
-                Date = clientMail.Date,
+                Date = clientMail.Date.DateTime,
                 IsRead = readOrNot
             };
 
             return mail;
-        }
-
-        private static bool IsHandledForSendingFailure(Exception ex)
-        {
-            return ex is InvalidOperationException ||
-                   ex is SmtpException ||
-                   ex is ArgumentException ||
-                   ex is FormatException;
         }
     }
 }

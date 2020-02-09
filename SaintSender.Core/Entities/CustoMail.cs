@@ -1,5 +1,7 @@
-﻿using GemBox.Email;
+﻿using MailKit;
+using MimeKit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SaintSender.Core.Entities
@@ -8,15 +10,15 @@ namespace SaintSender.Core.Entities
     {
         private bool _isRead;
 
-        public MailAddressCollection Sender { get; set; }
+        public InternetAddressList Sender { get; set; }
 
-        public MailAddressCollection To { get; set; }
+        public InternetAddressList To { get; set; }
 
         public string Subject { get; set; }
 
-        public MailAddressCollection Cc { get; set; }
+        public InternetAddressList Cc { get; set; }
 
-        public MailAddressCollection Bcc { get; set; }
+        public InternetAddressList Bcc { get; set; }
 
         public string TextBody { get; set; }
 
@@ -28,9 +30,9 @@ namespace SaintSender.Core.Entities
             set => SetProperty(ref _isRead, value);
         }
 
-        public AttachmentCollection Attachments { get; set; }
+        public IEnumerable<MimeEntity> Attachments { get; set; }
 
-        public int MessageNumber { get; set; }
+        public UniqueId MessageNumber { get; set; }
 
         public DateTime Date { get; set; }
 
@@ -39,13 +41,12 @@ namespace SaintSender.Core.Entities
         public int CompareTo(object other)
         {
             var compared = (CustoMail)other;
-            if (compared.Date < this.Date)
+            if (compared.Date < Date)
             {
                 return -1;
             }
 
             return compared.Date == Date ? 0 : 1;
         }
-
     }
 }
