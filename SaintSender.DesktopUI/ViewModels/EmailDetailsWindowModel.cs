@@ -1,5 +1,4 @@
 ﻿using SaintSender.Core.Entities;
-using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
 using System.Linq;
 using System.Windows;
@@ -7,18 +6,19 @@ using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class EmailDetailsWindowModel : Base
+    public class EmailDetailsWindowModel : ViewModelBase
     {
         private bool _deletingEmail;
         private bool _savingEmail;
 
-        public EmailDetailsWindowModel(CustoMail mail)
+        public EmailDetailsWindowModel(Email email)
         {
-            Email = mail;
+            Email = email;
+
             SetCommands();
         }
 
-        public CustoMail Email { get; set; }
+        public Email Email { get; set; }
 
         public bool IsDeletingEmail
         {
@@ -56,7 +56,7 @@ namespace SaintSender.DesktopUI.ViewModels
         private async void SaveToFile_Execute(Button button)
         {
             IsSavingEmail = true;
-            var overwritten = await GmailService.SaveAsync(Email);
+            var overwritten = await EmailService.SaveAsync(Email);
 
             IsSavingEmail = false;
 
@@ -74,7 +74,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsDeletingEmail = true;
 
-            await GmailService.DeleteAsync(Email);
+            await EmailService.DeleteAsync(Email);
 
             IsDeletingEmail = false;
 

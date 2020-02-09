@@ -73,6 +73,7 @@
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\IntegerToBooleanConverter.cs" />
     <Compile Include="ViewModels\ComposeWindowModel.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\ComposeWindow.xaml.cs">
       <DependentUpon>ComposeWindow.xaml</DependentUpon>
     </Compile>

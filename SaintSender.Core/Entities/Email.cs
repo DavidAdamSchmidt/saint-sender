@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace SaintSender.Core.Entities
 {
-    public class CustoMail : Base, IComparable
+    public class Email : ObservableBase, IComparable
     {
         private bool _isRead;
 
@@ -40,7 +40,7 @@ namespace SaintSender.Core.Entities
 
         public int CompareTo(object other)
         {
-            var compared = (CustoMail)other;
+            var compared = (Email)other;
             if (compared.Date < Date)
             {
                 return -1;

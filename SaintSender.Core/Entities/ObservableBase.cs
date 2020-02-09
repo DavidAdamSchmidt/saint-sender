@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace SaintSender.Core.Entities
 {
-    public abstract class Base : INotifyPropertyChanged
+    public abstract class ObservableBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

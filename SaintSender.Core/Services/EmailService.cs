@@ -13,37 +13,43 @@ using System.Threading.Tasks;
 
 namespace SaintSender.Core.Services
 {
-    public static class GmailService
+    public class EmailService
     {
-        private const string ImapHost = "imap.gmail.com";
-        private const string SmtpHost = "smtp.gmail.com";
+        private readonly string _domain;
+        private readonly string _imapHost;
+        private readonly string _smtpHost;
 
-        public static string Email => EncryptionService.RetrieveData().Email;
+        public EmailService(string domain)
+        {
+            _domain = domain;
+            _imapHost = $"imap.{_domain}";
+            _smtpHost = $"smtp.{_domain}";
+        }
 
-        private static string Password => EncryptionService.RetrieveData().Password;
+        public string Email => EncryptionService.RetrieveData().Email;
 
-        public static async Task<bool> AuthenticateAsync(string email, string password)
+        private string Password => EncryptionService.RetrieveData().Password;
+
+        public async Task<bool> AuthenticateAsync(string email, string password)
         {
             return await Task.Factory.StartNew(() => Authenticate(email, password));
         }
 
-        public static bool Authenticate(string email, string password)
+        public bool Authenticate(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 return false;
             }
 
-            const string domain = "@gmail.com";
-
-            if (!email.EndsWith(domain))
+            if (!email.EndsWith(_domain))
             {
-                email += domain;
+                email += _domain;
             }
 
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
-            client.Connect(ImapHost, 993, true);
+            client.Connect(_imapHost, 993, true);
 
             try
             {
@@ -64,14 +70,13 @@ namespace SaintSender.Core.Services
             return true;
         }
 
-        public static async Task<bool> SendAsync(string recipient, string subject, string body)
+        public async Task<bool> SendAsync(string recipient, string subject, string body)
         {
             return await Task.Factory.StartNew(() => Send(recipient, subject, body));
         }
 
-        public static bool Send(string recipient, string subject, string body)
+        public bool Send(string recipient, string subject, string body)
         {
-
             SmtpClient smtp = null;
             MailMessage message = null;
 
@@ -82,7 +87,7 @@ namespace SaintSender.Core.Services
 
                 smtp = new SmtpClient
                 {
-                    Host = SmtpHost,
+                    Host = _smtpHost,
                     Port = 587,
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
@@ -115,16 +120,16 @@ namespace SaintSender.Core.Services
             }
         }
 
-        public static async Task UpdateAsync(AsyncObservableCollection<CustoMail> emails)
+        public async Task UpdateAsync(AsyncObservableCollection<Email> emails)
         {
             await Task.Factory.StartNew(() => Update(emails));
         }
 
-        public static void Update(ICollection<CustoMail> emails)
+        public void Update(ICollection<Email> emails)
         {
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
-            client.Connect(ImapHost, 993, true);
+            client.Connect(_imapHost, 993, true);
             client.Authenticate(Email, Password);
 
             var inbox = client.Inbox;
@@ -145,15 +150,15 @@ namespace SaintSender.Core.Services
             client.Disconnect(true);
         }
 
-        public static async Task<bool> SaveAsync(CustoMail mail)
+        public async Task<bool> SaveAsync(Email email)
         {
-            return await Task.Factory.StartNew(() => Save(mail));
+            return await Task.Factory.StartNew(() => Save(email));
         }
 
-        public static bool Save(CustoMail mail)
+        public bool Save(Email email)
         {
             var currentDirectory = Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}\SavedEmails");
-            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            var fileName = string.Concat(email.MessageNumber, email.Subject);
             var filePath = $@"{currentDirectory.FullName}\{fileName}.txt";
             if (!File.Exists(filePath))
             {
@@ -164,28 +169,28 @@ namespace SaintSender.Core.Services
 
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
-            client.Connect(ImapHost, 993, true);
+            client.Connect(_imapHost, 993, true);
             client.Authenticate(Email, Password);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadOnly);
 
-            var message = inbox.GetMessage(mail.MessageNumber);
+            var message = inbox.GetMessage(email.MessageNumber);
             message.WriteTo(filePath);
 
             return overwritten;
         }
 
-        public static async Task DeleteAsync(CustoMail mail)
+        public async Task DeleteAsync(Email email)
         {
-            await Task.Factory.StartNew(() => Delete(mail));
+            await Task.Factory.StartNew(() => Delete(email));
         }
 
-        public static void Delete(CustoMail mail)
+        public void Delete(Email email)
         {
             var currentDirectory = $@"{Directory.GetCurrentDirectory()}\SavedEmails";
             var files = Directory.GetFiles(currentDirectory);
-            var fileName = string.Concat(mail.MessageNumber, mail.Subject);
+            var fileName = string.Concat(email.MessageNumber, email.Subject);
             foreach (var file in files)
             {
                 if (!file.EndsWith($@"\{fileName}.txt"))
@@ -199,19 +204,19 @@ namespace SaintSender.Core.Services
 
             using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
 
-            client.Connect(ImapHost, 993, true);
+            client.Connect(_imapHost, 993, true);
             client.Authenticate(Email, Password);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadWrite);
-            inbox.AddFlags(new[] { mail.MessageNumber }, MessageFlags.Deleted, true);
+            inbox.AddFlags(new[] { email.MessageNumber }, MessageFlags.Deleted, true);
 
             inbox.Expunge();
         }
 
-        public static CustoMail EmailConverter(MimeMessage clientMail, bool readOrNot)
+        public Email EmailConverter(MimeMessage clientMail, bool readOrNot)
         {
-            var mail = new CustoMail
+            var mail = new Email
             {
                 Attachments = clientMail.Attachments,
                 Bcc = clientMail.Bcc,

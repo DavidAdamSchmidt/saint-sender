@@ -8,7 +8,7 @@ using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class LoginWindowModel : Base
+    public class LoginWindowModel : ViewModelBase
     {
         private string _email;
         private bool _sending;
@@ -17,6 +17,7 @@ namespace SaintSender.DesktopUI.ViewModels
         public LoginWindowModel()
         {
             _userData = EncryptionService.RetrieveAllData();
+
             SetCommands();
         }
 
@@ -94,7 +95,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsSending = true;
 
-            var result = await GmailService.AuthenticateAsync(_email, passwordBox.Password);
+            var result = await EmailService.AuthenticateAsync(_email, passwordBox.Password);
 
             if (result)
             {

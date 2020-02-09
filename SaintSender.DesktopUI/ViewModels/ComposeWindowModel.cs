@@ -1,11 +1,10 @@
 ﻿using SaintSender.Core.Entities;
-using SaintSender.Core.Services;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class ComposeWindowModel : Base
+    public class ComposeWindowModel : ViewModelBase
     {
         private string _recipient;
         private string _subject;
@@ -63,7 +62,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             IsSending = true;
 
-            var sent = await GmailService.SendAsync(_recipient, _subject, _message);
+            var sent = await EmailService.SendAsync(_recipient, _subject, _message);
 
             IsSending = false;
 

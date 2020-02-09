@@ -2,12 +2,11 @@
 using System.Windows;
 using System.Windows.Controls;
 using SaintSender.Core.Entities;
-using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
-    public class MainWindowModel : Base
+    public class MainWindowModel : ViewModelBase
     {
         private string _email;
         private bool _loadingEmails;
@@ -18,7 +17,7 @@ namespace SaintSender.DesktopUI.ViewModels
             SetCommands();
         }
 
-        public AsyncObservableCollection<CustoMail> Emails { get; } = new AsyncObservableCollection<CustoMail>();
+        public AsyncObservableCollection<Email> Emails { get; } = new AsyncObservableCollection<Email>();
 
         public string UserEmail
         {
@@ -44,7 +43,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
-        public DelegateCommand<CustoMail> ReadDoubleClickedEmail { get; private set; }
+        public DelegateCommand<Email> ReadDoubleClickedEmail { get; private set; }
 
         public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
@@ -70,7 +69,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private async Task FillEmailCollection()
         {
-            await GmailService.UpdateAsync(Emails);
+            await EmailService.UpdateAsync(Emails);
         }
 
         private void SetCommands()
@@ -79,13 +78,13 @@ namespace SaintSender.DesktopUI.ViewModels
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
-            ReadDoubleClickedEmail = new DelegateCommand<CustoMail>(ReadEmail_Execute, ReadEmail_CanExecute);
+            ReadDoubleClickedEmail = new DelegateCommand<Email>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
         }
 
         private void LoadEmails_Execute(string throwAway)
         {
-            UserEmail = GmailService.Email;
+            UserEmail = EmailService.Email;
             SetEmails();
         }
 
@@ -123,7 +122,7 @@ namespace SaintSender.DesktopUI.ViewModels
             return SetCommandAvailability();
         }
 
-        private void ReadEmail_Execute(CustoMail email)
+        private void ReadEmail_Execute(Email email)
         {
             email.IsRead = true;
             var emailDetailsDialog = new EmailDetailsWindow
@@ -133,7 +132,7 @@ namespace SaintSender.DesktopUI.ViewModels
             emailDetailsDialog.ShowDialog();
         }
 
-        private bool ReadEmail_CanExecute(CustoMail email)
+        private bool ReadEmail_CanExecute(Email email)
         {
             return SetCommandAvailability();
         }
