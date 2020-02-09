@@ -6,9 +6,28 @@ using System.Linq;
 
 namespace SaintSender.Core.Entities
 {
-    public class ObservableEmail : ObservableBase, IComparable
+    public class ObservableEmail : ObservableBase, IComparable<ObservableEmail>
     {
         private bool _isRead;
+
+        public ObservableEmail()
+        {
+        }
+
+        public ObservableEmail(MimeMessage message, UniqueId messageNumber, bool isRead)
+        {
+            From = message.From;
+            To = message.To;
+            Subject = message.Subject;
+            Bcc = message.Bcc;
+            Cc = message.Cc;
+            TextBody = message.TextBody;
+            HtmlBody = message.HtmlBody;
+            Attachments = message.Attachments;
+            Date = message.Date.DateTime;
+            MessageNumber = messageNumber;
+            IsRead = isRead;
+        }
 
         public InternetAddressList From { get; set; }
 
@@ -24,46 +43,28 @@ namespace SaintSender.Core.Entities
 
         public string HtmlBody { get; set; }
 
+        public IEnumerable<MimeEntity> Attachments { get; set; }
+
+        public DateTime Date { get; set; }
+
+        public UniqueId MessageNumber { get; set; }
+
         public bool IsRead
         {
             get => _isRead;
             set => SetProperty(ref _isRead, value);
         }
 
-        public IEnumerable<MimeEntity> Attachments { get; set; }
-
-        public UniqueId MessageNumber { get; set; }
-
-        public DateTime Date { get; set; }
-
         public string FirstSender => From.SingleOrDefault()?.ToString();
 
-        public static ObservableEmail ConvertFromMimeMessage(MimeMessage message, bool isRead)
+        public int CompareTo(ObservableEmail other)
         {
-            return new ObservableEmail
+            if (Date == other.Date)
             {
-                Attachments = message.Attachments,
-                Bcc = message.Bcc,
-                Cc = message.Cc,
-                HtmlBody = message.HtmlBody,
-                TextBody = message.TextBody,
-                From = message.From,
-                Subject = message.Subject,
-                To = message.To,
-                Date = message.Date.DateTime,
-                IsRead = isRead
-            };
-        }
-
-        public int CompareTo(object other)
-        {
-            var compared = (ObservableEmail)other;
-            if (compared.Date < Date)
-            {
-                return -1;
+                return 0;
             }
 
-            return compared.Date == Date ? 0 : 1;
+            return Date < other.Date ? -1 : 1;
         }
     }
 }

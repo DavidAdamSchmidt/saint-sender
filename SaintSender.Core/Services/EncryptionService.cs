@@ -1,4 +1,5 @@
 ﻿using SaintSender.Core.Entities;
+using SaintSender.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,6 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
-using SaintSender.Core.Exceptions;
 
 namespace SaintSender.Core.Services
 {
@@ -22,7 +22,7 @@ namespace SaintSender.Core.Services
 
             return filePaths
                 .Select(RetrieveData)
-                .Where(userInfo => !string.IsNullOrEmpty(userInfo.Email))
+                .Where(userInfo => !string.IsNullOrEmpty(userInfo.EmailAddress))
                 .ToList();
         }
 
@@ -35,15 +35,15 @@ namespace SaintSender.Core.Services
         {
             var path = CreateFile(emailAddress);
 
-            var saveDataOne = RsaEncrypt(emailAddress);
-            var saveDataTwo = RsaEncrypt(password);
+            var encryptedEmailAddress = RsaEncrypt(emailAddress);
+            var encryptedPassword = RsaEncrypt(password);
 
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Write))
             {
                 var formatter = new BinaryFormatter();
 
-                formatter.Serialize(stream, saveDataOne);
-                formatter.Serialize(stream, saveDataTwo);
+                formatter.Serialize(stream, encryptedEmailAddress);
+                formatter.Serialize(stream, encryptedPassword);
             }
 
             File.Encrypt(path);
@@ -81,8 +81,8 @@ namespace SaintSender.Core.Services
 
                 return new UserInfo
                 {
-                    Email = RsaDecrypt((string) formatter.Deserialize(fileStream)),
-                    Password = RsaDecrypt((string) formatter.Deserialize(fileStream))
+                    EmailAddress = RsaDecrypt((string)formatter.Deserialize(fileStream)),
+                    Password = RsaDecrypt((string)formatter.Deserialize(fileStream))
 
                 };
             }
@@ -136,6 +136,7 @@ namespace SaintSender.Core.Services
             {
                 KeyContainerName = KeyContainerName
             };
+
             using var rsa = new RSACryptoServiceProvider(2048, cspParams);
             var encryptedData = rsa.Encrypt(plaintext, false);
 

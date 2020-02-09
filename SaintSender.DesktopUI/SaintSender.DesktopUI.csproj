@@ -77,7 +77,7 @@
     <Compile Include="Views\ComposeWindow.xaml.cs">
       <DependentUpon>ComposeWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\DateTimeConverterForEmailDate.cs" />
+    <Compile Include="Converters\DateTimeToStringConverter.cs" />
     <Compile Include="ViewModels\EmailDetailsWindowModel.cs" />
     <Compile Include="Views\EmailDetailsWindow.xaml.cs">
       <DependentUpon>EmailDetailsWindow.xaml</DependentUpon>

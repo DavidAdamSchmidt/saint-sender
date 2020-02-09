@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SaintSender.DesktopUI"
         xmlns:conv="clr-namespace:SaintSender.DesktopUI.Converters"
         xmlns:vm="clr-namespace:SaintSender.DesktopUI.ViewModels"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
@@ -49,7 +48,7 @@
         <WrapPanel>
             <Label Target="{Binding ElementName=TxtBxEmail}">_Email:</Label>
             <TextBox x:Name="TxtBxEmail" Style="{StaticResource Input}"
-                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+                     Text="{Binding EmailAddress, UpdateSourceTrigger=PropertyChanged}"/>
             <ComboBox IsEnabled="{Binding EmailAddresses.Count, Converter={StaticResource IntegerToBooleanConverter}}" x:Name="ChooseUser" Height="24" Width="18" IsTabStop="False"
                       ItemsSource="{Binding EmailAddresses}" SelectedItem="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
                 <i:Interaction.Triggers>
@@ -75,7 +74,7 @@
         </WrapPanel>
         <WrapPanel>
             <Button Command="{Binding SignInButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
-                _Sign in
+                _Sign In
             </Button>
             <Button Command="{Binding CancelButtonClickCommand}" CommandParameter="{Binding ElementName=PwBxPassword}">
                 _Cancel

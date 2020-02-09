@@ -36,39 +36,39 @@ namespace SaintSender.Core.Services
 
         private string Password => _encryptionService.RetrievePassword(EmailAddress);
 
-        public async Task<bool> AuthenticateAsync(string email, string password)
+        public async Task<bool> AuthenticateAsync(string emailAddress, string password)
         {
-            return await Task.Factory.StartNew(() => Authenticate(email, password));
+            return await Task.Factory.StartNew(() => Authenticate(emailAddress, password));
         }
 
-        public bool Authenticate(string email, string password)
+        public bool Authenticate(string emailAddress, string password)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(emailAddress) || string.IsNullOrWhiteSpace(password))
             {
                 return false;
             }
 
-            if (!email.EndsWith(_domain))
+            if (!emailAddress.EndsWith(_domain))
             {
-                email += $"@{_domain}";
+                emailAddress += $"@{_domain}";
             }
 
             using var client = SetupImapClient(false);
 
             try
             {
-                client.Authenticate(email, password);
+                client.Authenticate(emailAddress, password);
             }
-            catch (Exception e) when (e is AuthenticationException)
+            catch (AuthenticationException)
             {
                 return false;
             }
 
             if (client.IsAuthenticated)
             {
-                EmailAddress = email;
+                EmailAddress = emailAddress;
 
-                _encryptionService.SaveData(email, password);
+                _encryptionService.SaveData(emailAddress, password);
             }
 
             client.Disconnect(true);
@@ -144,10 +144,9 @@ namespace SaintSender.Core.Services
             foreach (var item in items.Reverse())
             {
                 var message = inbox.GetMessage(item.UniqueId);
-                var converted = ObservableEmail.ConvertFromMimeMessage(message, (item.Flags & MessageFlags.Seen) != 0);
+                var email = new ObservableEmail(message, item.UniqueId, (item.Flags & MessageFlags.Seen) != 0);
 
-                converted.MessageNumber = item.UniqueId;
-                emails.Add(converted);
+                emails.Add(email);
             }
 
             client.Disconnect(true);
@@ -194,6 +193,7 @@ namespace SaintSender.Core.Services
             var currentDirectory = $@"{Directory.GetCurrentDirectory()}\SavedEmails";
             var files = Directory.GetFiles(currentDirectory);
             var fileName = string.Concat(email.MessageNumber, email.Subject);
+
             foreach (var file in files)
             {
                 if (!file.EndsWith($@"\{fileName}.txt"))

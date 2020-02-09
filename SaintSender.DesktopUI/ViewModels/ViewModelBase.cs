@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows;
-using SaintSender.Core.Entities;
+﻿using SaintSender.Core.Entities;
 using SaintSender.Core.Exceptions;
 using SaintSender.Core.Services;
+using System;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
@@ -25,7 +25,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             try
             {
-               await asyncOp();
+                await asyncOp();
             }
             catch (DataRetrievalException e)
             {
@@ -51,7 +51,7 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             onError();
 
-            MessageBox.Show($"Could not retrieve user credentials. Reason: {e.Message}.", "Error",
+            MessageBox.Show($"Could not retrieve user credentials. Reason: {e.Message}", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
 
             Environment.Exit(Environment.ExitCode);

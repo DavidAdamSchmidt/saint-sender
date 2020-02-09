@@ -20,19 +20,9 @@ namespace SaintSender.Core.Entities
             CreateAsyncOp();
         }
 
-        private void CreateAsyncOp()
-        {
-            _asyncOp = AsyncOperationManager.CreateOperation(null);
-        }
-
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             _asyncOp.Post(RaiseCollectionChanged, e);
-        }
-
-        private void RaiseCollectionChanged(object param)
-        {
-            base.OnCollectionChanged((NotifyCollectionChangedEventArgs)param);
         }
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -40,9 +30,19 @@ namespace SaintSender.Core.Entities
             _asyncOp.Post(RaisePropertyChanged, e);
         }
 
+        private void RaiseCollectionChanged(object param)
+        {
+            base.OnCollectionChanged((NotifyCollectionChangedEventArgs)param);
+        }
+
         private void RaisePropertyChanged(object param)
         {
             base.OnPropertyChanged((PropertyChangedEventArgs)param);
+        }
+
+        private void CreateAsyncOp()
+        {
+            _asyncOp = AsyncOperationManager.CreateOperation(null);
         }
     }
 }

@@ -70,7 +70,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
             if (sent)
             {
-                MessageBox.Show($"Your e-mail has bent sent to {_recipient}", "Success",
+                MessageBox.Show($"Your e-mail has been sent to {_recipient}.", "Success",
                     MessageBoxButton.OK, MessageBoxImage.Information);
 
                 var window = Window.GetWindow(button);
@@ -78,7 +78,7 @@ namespace SaintSender.DesktopUI.ViewModels
             }
             else
             {
-                MessageBox.Show($"Couldn't send your e-mail to {_recipient}", "Failed Operation",
+                MessageBox.Show($"Could not send your e-mail to {_recipient}.", "Failed Operation",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

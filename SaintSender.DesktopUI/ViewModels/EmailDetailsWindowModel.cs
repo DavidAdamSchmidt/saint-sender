@@ -32,25 +32,27 @@ namespace SaintSender.DesktopUI.ViewModels
             set => SetProperty(ref _savingEmail, value);
         }
 
+        public DelegateCommand<Button> SaveToFileClickCommand { get; private set; }
+
         public DelegateCommand<Button> CloseButtonClickCommand { get; private set; }
 
         public DelegateCommand<Button> DeleteButtonClickCommand { get; private set; }
 
-        public DelegateCommand<Button> SaveToFileClickCommand { get; private set; }
 
         protected override void SetProperty<T>(ref T storage, T value, string propertyName = null)
         {
             base.SetProperty(ref storage, value, propertyName);
+
+            SaveToFileClickCommand.RaiseCanExecuteChanged();
             CloseButtonClickCommand.RaiseCanExecuteChanged();
             DeleteButtonClickCommand.RaiseCanExecuteChanged();
-            SaveToFileClickCommand.RaiseCanExecuteChanged();
         }
 
         private void SetCommands()
         {
+            SaveToFileClickCommand = new DelegateCommand<Button>(SaveToFile_Execute, SaveToFile_CanExecute);
             CloseButtonClickCommand = new DelegateCommand<Button>(CloseEmailDetailsWindow_Execute, CloseEmailDetailsWindow_CanExecute);
             DeleteButtonClickCommand = new DelegateCommand<Button>(DeleteCurrentEmail_Execute, DeleteCurrentEmail_CanExecute);
-            SaveToFileClickCommand = new DelegateCommand<Button>(SaveToFile_Execute, SaveToFile_CanExecute);
         }
 
         private async void SaveToFile_Execute(Button button)
@@ -63,12 +65,22 @@ namespace SaintSender.DesktopUI.ViewModels
 
             IsSavingEmail = false;
 
-            var message = $"Your E-Mail has been successfully {(overwritten ? "overwritten" : "saved")}!";
+            var message = $"Your e-mail has been successfully {(overwritten ? "overwritten" : "saved")}.";
 
-            MessageBox.Show(message, "E-Mail Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private bool SaveToFile_CanExecute(Button button)
+        {
+            return !IsWorking();
+        }
+
+        private void CloseEmailDetailsWindow_Execute(Button button)
+        {
+            CloseParentWindow(button);
+        }
+
+        private bool CloseEmailDetailsWindow_CanExecute(Button button)
         {
             return !IsWorking();
         }
@@ -85,21 +97,12 @@ namespace SaintSender.DesktopUI.ViewModels
 
             var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
             var windowModel = (MainWindowModel)mainWindow.DataContext;
+
             windowModel.Emails.Remove(Email);
             CloseParentWindow(button);
         }
 
         private bool DeleteCurrentEmail_CanExecute(Button button)
-        {
-            return !IsWorking();
-        }
-
-        private void CloseEmailDetailsWindow_Execute(Button button)
-        {
-            CloseParentWindow(button);
-        }
-
-        private bool CloseEmailDetailsWindow_CanExecute(Button button)
         {
             return !IsWorking();
         }

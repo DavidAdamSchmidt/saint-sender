@@ -10,7 +10,7 @@
         Height="450" Width="550" MinWidth="350" MinHeight="350"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <conv:DateTimeConverterForEmailDate x:Key="DateTimeConverter"/>
+        <conv:DateTimeToStringConverter x:Key="DateTimeConverter"/>
         <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <Style TargetType="{x:Type Button}">
             <Setter Property="Height" Value="22" />
@@ -46,7 +46,7 @@
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Orientation="Horizontal">
             <Button Name="BtnSaveToFile" Margin="10,0,15,0" HorizontalAlignment="Left"
                     Command="{Binding SaveToFileClickCommand}" CommandParameter="{Binding ElementName=BtnSaveToFile}">
-                _Save To File
+                _Save to File
             </Button>
             <fa:ImageAwesome Icon="Spinner" Spin="True" Height="48" Width="48"
                              Visibility="{Binding IsSavingEmail, Converter={StaticResource BooleanToVisibilityConverter}}" />

@@ -32,21 +32,21 @@ namespace SaintSender.DesktopUI.ViewModels
 
         public DelegateCommand<string> WindowLoadedCommand { get; private set; }
 
-        public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
-
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
         public DelegateCommand<ObservableEmail> ReadDoubleClickedEmail { get; private set; }
 
         public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
 
+        public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
+
         protected override void SetProperty<T>(ref T storage, T value, string propertyName = null)
         {
             base.SetProperty(ref storage, value, propertyName);
 
             SendNewButtonClickCommand.RaiseCanExecuteChanged();
-            LogoutButtonClickCommand.RaiseCanExecuteChanged();
             RefreshButtonClickCommand.RaiseCanExecuteChanged();
+            LogoutButtonClickCommand.RaiseCanExecuteChanged();
         }
 
         private async void SetEmails()
@@ -68,10 +68,10 @@ namespace SaintSender.DesktopUI.ViewModels
         private void SetCommands()
         {
             WindowLoadedCommand = new DelegateCommand<string>(LoadEmails_Execute);
-            LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<ObservableEmail>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
+            LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
         }
 
         private void LoadEmails_Execute(string throwAway)
@@ -86,21 +86,6 @@ namespace SaintSender.DesktopUI.ViewModels
         }
 
         private bool SendNew_CanExecute(string throwAway)
-        {
-            return !_loadingEmails;
-        }
-
-        private void Logout_Execute(Button button)
-        {
-            var loginWindow = new LoginWindow();
-
-            var parentWindow = Window.GetWindow(button);
-            parentWindow?.Close();
-
-            loginWindow.Show();
-        }
-
-        private bool Logout_CanExecute(Button button)
         {
             return !_loadingEmails;
         }
@@ -140,6 +125,21 @@ namespace SaintSender.DesktopUI.ViewModels
         }
 
         private bool RefreshEmails_CanExecute(string throwAway)
+        {
+            return !_loadingEmails;
+        }
+
+        private void Logout_Execute(Button button)
+        {
+            var loginWindow = new LoginWindow();
+
+            var parentWindow = Window.GetWindow(button);
+            parentWindow?.Close();
+
+            loginWindow.Show();
+        }
+
+        private bool Logout_CanExecute(Button button)
         {
             return !_loadingEmails;
         }

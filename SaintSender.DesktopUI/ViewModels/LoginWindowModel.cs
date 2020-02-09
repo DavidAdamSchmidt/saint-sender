@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using SaintSender.Core.Entities;
+﻿using SaintSender.Core.Entities;
 using SaintSender.Core.Exceptions;
 using SaintSender.Core.Services;
 using SaintSender.DesktopUI.Views;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace SaintSender.DesktopUI.ViewModels
 {
     public class LoginWindowModel : ViewModelBase
     {
-        private string _email;
+        private string _emailAddress;
         private string _selectedUser;
         private bool _sending;
         private List<UserInfo> _userData;
@@ -21,24 +21,14 @@ namespace SaintSender.DesktopUI.ViewModels
             SetCommands();
         }
 
-        public string Email
+        public string EmailAddress
         {
-            get => _email;
+            get => _emailAddress;
             set
             {
-                SetProperty(ref _email, value);
-                CancelButtonClickCommand.RaiseCanExecuteChanged();
-            }
-        }
+                SetProperty(ref _emailAddress, value);
 
-        public bool IsSending
-        {
-            get => _sending;
-            set
-            {
-                SetProperty(ref _sending, value);
                 CancelButtonClickCommand.RaiseCanExecuteChanged();
-                SignInButtonClickCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -48,28 +38,40 @@ namespace SaintSender.DesktopUI.ViewModels
             set => SetProperty(ref _selectedUser, value);
         }
 
+        public bool IsSending
+        {
+            get => _sending;
+            set
+            {
+                SetProperty(ref _sending, value);
+
+                SignInButtonClickCommand.RaiseCanExecuteChanged();
+                CancelButtonClickCommand.RaiseCanExecuteChanged();
+            }
+        }
+
         public AsyncObservableCollection<string> EmailAddresses { get; } = new AsyncObservableCollection<string>();
 
         public DelegateCommand<string> WindowLoadedCommand { get; private set; }
 
         public DelegateCommand<string> DropDownOpenedCommand { get; private set; }
 
-        public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
-
-        public DelegateCommand<PasswordBox> SignInButtonClickCommand { get; private set; }
+        public DelegateCommand<PasswordBox> SelectionChangedCommand { get; private set; }
 
         public DelegateCommand<string> PasswordChangedCommand { get; private set; }
 
-        public DelegateCommand<PasswordBox> SelectionChangedCommand { get; private set; }
+        public DelegateCommand<PasswordBox> SignInButtonClickCommand { get; private set; }
+
+        public DelegateCommand<PasswordBox> CancelButtonClickCommand { get; private set; }
 
         private void SetCommands()
         {
             WindowLoadedCommand = new DelegateCommand<string>(RetrieveUserData_Execute);
-            CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
-            SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute, AuthenticateLogin_CanExecute);
-            PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
+            DropDownOpenedCommand = new DelegateCommand<string>(ResetSelectedUser_Execute);
             SelectionChangedCommand = new DelegateCommand<PasswordBox>(AutoFillLoginDetails_Execute);
-            DropDownOpenedCommand = new DelegateCommand<string>(ResetSelected_Execute);
+            PasswordChangedCommand = new DelegateCommand<string>(UpdateCancelLoginAvailability_Execute);
+            SignInButtonClickCommand = new DelegateCommand<PasswordBox>(AuthenticateLogin_Execute, AuthenticateLogin_CanExecute);
+            CancelButtonClickCommand = new DelegateCommand<PasswordBox>(CancelLogin_Execute, CancelLogin_CanExecute);
         }
 
         private void RetrieveUserData_Execute(string throwAway)
@@ -83,7 +85,12 @@ namespace SaintSender.DesktopUI.ViewModels
                 _userData = new List<UserInfo>();
             }
 
-            _userData.ForEach(x => EmailAddresses.Add(x.Email));
+            _userData.ForEach(x => EmailAddresses.Add(x.EmailAddress));
+        }
+
+        private void ResetSelectedUser_Execute(string throwAway)
+        {
+            SelectedUser = null;
         }
 
         private void AutoFillLoginDetails_Execute(PasswordBox passwordBox)
@@ -93,38 +100,25 @@ namespace SaintSender.DesktopUI.ViewModels
                 return;
             }
 
-            Email = SelectedUser;
+            EmailAddress = SelectedUser;
 
-            foreach (var user in _userData.Where(user => user.Email.Equals(SelectedUser)))
+            foreach (var user in _userData.Where(user => user.EmailAddress.Equals(SelectedUser)))
             {
                 passwordBox.Password = user.Password;
                 break;
             }
         }
 
-        private void ResetSelected_Execute(string throwAway)
+        private void UpdateCancelLoginAvailability_Execute(string s)
         {
-            SelectedUser = null;
-        }
-
-        private void CancelLogin_Execute(PasswordBox passwordBox)
-        {
-            Email = string.Empty;
-            passwordBox.Password = string.Empty;
-        }
-
-        private bool CancelLogin_CanExecute(PasswordBox passwordBox)
-        {
-            return (!string.IsNullOrWhiteSpace(Email) ||
-                    !string.IsNullOrWhiteSpace(passwordBox?.Password)) &&
-                   !_sending; ;
+            CancelButtonClickCommand.RaiseCanExecuteChanged();
         }
 
         private async void AuthenticateLogin_Execute(PasswordBox passwordBox)
         {
             IsSending = true;
 
-            var result = await EmailService.AuthenticateAsync(_email, passwordBox.Password);
+            var result = await EmailService.AuthenticateAsync(_emailAddress, passwordBox.Password);
 
             if (result)
             {
@@ -149,9 +143,17 @@ namespace SaintSender.DesktopUI.ViewModels
             return !_sending;
         }
 
-        private void UpdateCancelLoginAvailability_Execute(string s)
+        private void CancelLogin_Execute(PasswordBox passwordBox)
         {
-            CancelButtonClickCommand.RaiseCanExecuteChanged();
+            EmailAddress = string.Empty;
+            passwordBox.Password = string.Empty;
+        }
+
+        private bool CancelLogin_CanExecute(PasswordBox passwordBox)
+        {
+            return (!string.IsNullOrWhiteSpace(EmailAddress) ||
+                    !string.IsNullOrWhiteSpace(passwordBox?.Password)) &&
+                   !_sending; ;
         }
     }
 }
