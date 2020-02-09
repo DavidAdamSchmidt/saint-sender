@@ -53,9 +53,7 @@ namespace SaintSender.Core.Services
                 email += _domain;
             }
 
-            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
-
-            client.Connect(_imapHost, 993, true);
+            using var client = SetupImapClient(false);
 
             try
             {
@@ -63,8 +61,6 @@ namespace SaintSender.Core.Services
             }
             catch (Exception e) when (e is AuthenticationException)
             {
-                client.Dispose();
-
                 return false;
             }
 
@@ -74,6 +70,8 @@ namespace SaintSender.Core.Services
 
                 _encryptionService.SaveData(email, password);
             }
+
+            client.Disconnect(true);
 
             return true;
         }
@@ -135,10 +133,7 @@ namespace SaintSender.Core.Services
 
         public void Update(ICollection<ObservableEmail> emails)
         {
-            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
-
-            client.Connect(_imapHost, 993, true);
-            client.Authenticate(EmailAddress, Password);
+            using var client = SetupImapClient(true);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadOnly);
@@ -168,6 +163,7 @@ namespace SaintSender.Core.Services
             var currentDirectory = Directory.CreateDirectory($@"{Directory.GetCurrentDirectory()}\SavedEmails");
             var fileName = string.Concat(email.MessageNumber, email.Subject);
             var filePath = $@"{currentDirectory.FullName}\{fileName}.txt";
+
             if (!File.Exists(filePath))
             {
                 File.Create(filePath).Dispose();
@@ -175,16 +171,15 @@ namespace SaintSender.Core.Services
 
             var overwritten = !string.IsNullOrEmpty(File.ReadAllText(filePath));
 
-            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
-
-            client.Connect(_imapHost, 993, true);
-            client.Authenticate(EmailAddress, Password);
+            using var client = SetupImapClient(true);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadOnly);
 
             var message = inbox.GetMessage(email.MessageNumber);
             message.WriteTo(filePath);
+
+            client.Disconnect(true);
 
             return overwritten;
         }
@@ -210,16 +205,14 @@ namespace SaintSender.Core.Services
                 break;
             }
 
-            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
-
-            client.Connect(_imapHost, 993, true);
-            client.Authenticate(EmailAddress, Password);
+            using var client = SetupImapClient(true);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadWrite);
             inbox.AddFlags(new[] { email.MessageNumber }, MessageFlags.Deleted, true);
-
             inbox.Expunge();
+
+            client.Disconnect(true);
         }
 
         public async Task MarkAsReadAsync(ObservableEmail email)
@@ -229,14 +222,27 @@ namespace SaintSender.Core.Services
 
         public void MarkAsRead(ObservableEmail email)
         {
-            using var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
-
-            client.Connect(_imapHost, 993, true);
-            client.Authenticate(EmailAddress, Password);
+            using var client = SetupImapClient(true);
 
             var inbox = client.Inbox;
             inbox.Open(FolderAccess.ReadWrite);
             inbox.AddFlags(new[] { email.MessageNumber }, MessageFlags.Seen, true);
+
+            client.Disconnect(true);
+        }
+
+        private ImapClient SetupImapClient(bool authenticate)
+        {
+            var client = new ImapClient { ServerCertificateValidationCallback = (s, c, h, e) => true };
+
+            client.Connect(_imapHost, 993, true);
+
+            if (authenticate)
+            {
+                client.Authenticate(EmailAddress, Password);
+            }
+
+            return client;
         }
     }
 }
