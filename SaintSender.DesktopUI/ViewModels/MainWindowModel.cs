@@ -10,7 +10,6 @@ namespace SaintSender.DesktopUI.ViewModels
     {
         private string _emailAddress;
         private bool _loadingEmails;
-        private bool _loggingOut;
 
         public MainWindowModel()
         {
@@ -31,12 +30,6 @@ namespace SaintSender.DesktopUI.ViewModels
             set => SetProperty(ref _loadingEmails, value);
         }
 
-        public bool IsLoggingOut
-        {
-            get => _loggingOut;
-            set => SetProperty(ref _loggingOut, value);
-        }
-
         public DelegateCommand<string> WindowLoadedCommand { get; private set; }
 
         public DelegateCommand<Button> LogoutButtonClickCommand { get; private set; }
@@ -44,8 +37,6 @@ namespace SaintSender.DesktopUI.ViewModels
         public DelegateCommand<string> SendNewButtonClickCommand { get; private set; }
 
         public DelegateCommand<ObservableEmail> ReadDoubleClickedEmail { get; private set; }
-
-        public DelegateCommand<string> ExitProgramCommand { get; private set; }
 
         public DelegateCommand<string> RefreshButtonClickCommand { get; private set; }
 
@@ -78,7 +69,6 @@ namespace SaintSender.DesktopUI.ViewModels
         {
             WindowLoadedCommand = new DelegateCommand<string>(LoadEmails_Execute);
             LogoutButtonClickCommand = new DelegateCommand<Button>(Logout_Execute, Logout_CanExecute);
-            ExitProgramCommand = new DelegateCommand<string>(Exit_Execute);
             SendNewButtonClickCommand = new DelegateCommand<string>(SendNew_Execute, SendNew_CanExecute);
             ReadDoubleClickedEmail = new DelegateCommand<ObservableEmail>(ReadEmail_Execute, ReadEmail_CanExecute);
             RefreshButtonClickCommand = new DelegateCommand<string>(RefreshEmails_Execute, RefreshEmails_CanExecute);
@@ -90,12 +80,6 @@ namespace SaintSender.DesktopUI.ViewModels
             SetEmails();
         }
 
-        private void Exit_Execute(string throwAway)
-        {
-            EmailAddress = string.Empty;
-            IsLoggingOut = true;
-        }
-
         private void SendNew_Execute(string throwAway)
         {
             new ComposeWindow().ShowDialog();
@@ -103,14 +87,11 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool SendNew_CanExecute(string throwAway)
         {
-            return SetCommandAvailability();
+            return !_loadingEmails;
         }
 
         private void Logout_Execute(Button button)
         {
-            EmailAddress = string.Empty;
-            IsLoggingOut = true;
-
             var loginWindow = new LoginWindow();
 
             var parentWindow = Window.GetWindow(button);
@@ -121,7 +102,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool Logout_CanExecute(Button button)
         {
-            return SetCommandAvailability();
+            return !_loadingEmails;
         }
 
         private void ReadEmail_Execute(ObservableEmail email)
@@ -136,7 +117,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool ReadEmail_CanExecute(ObservableEmail email)
         {
-            return SetCommandAvailability();
+            return !_loadingEmails;
         }
 
         private async void RefreshEmails_Execute(string throwAway)
@@ -151,12 +132,7 @@ namespace SaintSender.DesktopUI.ViewModels
 
         private bool RefreshEmails_CanExecute(string throwAway)
         {
-            return SetCommandAvailability();
-        }
-
-        private bool SetCommandAvailability()
-        {
-            return !_loadingEmails && !_loggingOut;
+            return !_loadingEmails;
         }
     }
 }
